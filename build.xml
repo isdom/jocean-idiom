@@ -9,7 +9,9 @@
     <property name="module.name" value="${ant.project.name}" />
     <property name="module.version" value="0.0.2" />
 
-    <property name="devconf.url" value="http://stcdev.sky-mobi.com:8080/devconf" />
+    <!-- property name="devconf.url" value="http://stcdev.sky-mobi.com:8080/devconf" / -->
+    <property name="devconf.url" value="https://raw.github.com/isdom/devsetup/master/devconf/" />
+    
     <property name="lib.buildfile" value="build-lib.xml" />
 
     <!-- import file="../stc-libs/build-lib.xml" as="impl"/ -->
