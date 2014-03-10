@@ -35,7 +35,7 @@
         <conf name="develop" visibility="public" extends="compile" />
     </configurations>
     <publications>
-        <artifact name="${module.name}" type="jar" ext="jar" conf="compile"/>
+        <artifact name="${module.name}" ext="jar" conf="compile"/>
         <artifact name="${module.name}" type="source" ext="jar" conf="develop"/>
         <artifact name="${module.name}" type="javadoc" ext="jar" conf="develop"/>
     </publications>

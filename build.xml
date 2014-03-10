@@ -14,7 +14,7 @@
     
     <property name="lib.buildfile" value="build-lib.xml" />
 
-    <!-- import file="../stc-libs/build-lib.xml" as="impl"/ -->
+    <!-- import file="../../../../git/devsetup/devconf/build-lib.xml" as="impl"/ -->
     <import  as="impl">
         <url url="${devconf.url}/${lib.buildfile}"/>
     </import>
