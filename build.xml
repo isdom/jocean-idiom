@@ -9,12 +9,11 @@
     <property name="module.name" value="${ant.project.name}" />
     <property name="module.version" value="0.0.3" />
 
-    <property name="devconf.url" value="https://raw.github.com/isdom/devsetup/master/devconf/" />
-    
-    <property name="lib.buildfile" value="build-lib.xml" />
+    <property file="${user.home}/buildsettings.properties" />
+    <!-- property name="devconf.url" value="https://raw.github.com/isdom/devsetup/master/devconf/" /-->
+    <!-- property name="lib.buildfile" value="build-lib.xml" /-->
 
-    <!-- import file="../../../../git/devsetup/devconf/build-lib.xml" as="impl"/ -->
     <import  as="impl">
-        <url url="${devconf.url}/${lib.buildfile}"/>
+        <url url="${lib.buildfile}"/>
     </import>
 </project>
