@@ -23,7 +23,7 @@ public class InterfaceUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
 		return (T)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
-				new Class<?>[]{cls}, new CompositeImplHandler(impls));
+				new Class<?>[]{cls}, new CompositeImplHandler<T>(impls));
 	}
 
 	private static final class CompositeImplHandler<T> implements InvocationHandler {
@@ -70,4 +70,64 @@ public class InterfaceUtils {
 		
 		private final T[] _impls;
 	}
+	
+    @SuppressWarnings("unchecked")
+    public static <T> T genAsyncImpl(final Class<T> cls, final T impl, 
+            final ExectionLoop exectionLoop) {
+        return (T)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
+                new Class<?>[]{cls}, new AsyncImplHandler<T>(impl, exectionLoop));
+    }
+
+    private static final class AsyncImplHandler<T> implements InvocationHandler {
+
+        AsyncImplHandler(final T impl, final ExectionLoop exectionLoop) {
+            if ( null == impl || null == exectionLoop ) {
+                throw new NullPointerException("impl or exectionLoop is null.");
+            }
+            this._impl = impl;
+            this._exectionLoop = exectionLoop;
+        }
+        
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args)
+                throws Throwable {
+            // An invocation of the hashCode, equals, or toString methods declared in java.lang.Object 
+            //  on a proxy instance will be encoded and dispatched to the invocation handler's invoke 
+            //  method in the same manner as interface method invocations are encoded and dispatched, 
+            //  as described above. The declaring class of the Method object passed to invoke will be 
+            //  java.lang.Object. Other public methods of a proxy instance inherited from java.lang.Object 
+            //  are not overridden by a proxy class, so invocations of those methods behave like they do 
+            //  for instances of java.lang.Object.          
+            if ( method.getName().equals("hashCode") ) {
+                return  this._impl.hashCode();
+            }
+            else if (method.getName().equals("equals") ) {
+                return  (proxy == args[0]);
+            }
+            else if (method.getName().equals("toString") ) {
+                return  this._impl.toString();
+            }
+            
+            if ( this._exectionLoop.inExectionLoop() ) {
+                return method.invoke(this._impl, args);
+            }
+            else {
+                this._exectionLoop.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            method.invoke(_impl, args);
+                        }
+                        catch(Exception e) {
+                            LOG.warn("exception when invoke method({}) for impl({}), detail:{}",
+                                    method.getName(), _impl, ExceptionUtils.exception2detail(e));
+                        }
+                    }});
+                return  null;
+            }
+        }
+        
+        private final T _impl;
+        private final ExectionLoop _exectionLoop;
+    }
 }
