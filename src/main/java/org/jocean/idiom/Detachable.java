@@ -8,5 +8,5 @@ package org.jocean.idiom;
  *
  */
 public interface Detachable {
-	public void detach();
+	public void detach() throws Exception;
 }
