@@ -54,7 +54,8 @@ public final class Pair<FIRST, SECOND> implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pair other = (Pair) obj;
+		@SuppressWarnings("rawtypes")
+        Pair other = (Pair) obj;
 		if (first == null) {
 			if (other.first != null)
 				return false;
