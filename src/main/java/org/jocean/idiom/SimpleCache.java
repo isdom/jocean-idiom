@@ -3,7 +3,6 @@
  */
 package org.jocean.idiom;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
