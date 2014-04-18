@@ -19,14 +19,14 @@ public class SimpleCache<K, V> {
     private static final Logger LOG = 
             LoggerFactory.getLogger(SimpleCache.class);
     
-    public V get(final K key, final Callable<V> ifAbsent) {
+    public V get(final K key, final Function<K, V> ifAbsent) {
         V value = this._map.get(key);
         if ( null == value ) {
             try {
-                value = ifAbsent.call();
+                value = ifAbsent.apply(key);
             } catch (Exception e) {
-                LOG.warn("exception when call SimpleCache's ifAbsent, detail: {}", 
-                        ExceptionUtils.exception2detail(e));
+                LOG.warn("exception when call SimpleCache's ifAbsent with key({}), detail: {}", 
+                        key, ExceptionUtils.exception2detail(e));
                 throw new RuntimeException(e);
             }
             final V oldValue = this._map.putIfAbsent( key, value );
