@@ -7,7 +7,7 @@
 
     <!--设置下面要用到的属性-->
     <property name="module.name" value="${ant.project.name}" />
-    <property name="module.version" value="0.0.7" />
+    <property name="module.version" value="0.0.8" />
 
     <property file="${user.home}/buildsettings.properties" />
 
