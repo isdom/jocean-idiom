@@ -90,11 +90,11 @@ public class PropertyPlaceholderHelper {
      * @param properties the <code>Properties</code> to use for replacement.
      * @return the supplied value with placeholders replaced inline.
      */
-    public String replacePlaceholders(final String value, final Properties properties,
+    public String replacePlaceholders(final Object resolveContext, final String value, final Properties properties,
             final Set<String> visitedPlaceholders) {
         _assertNotNull(properties, "Argument 'properties' must not be null.");
-        return replacePlaceholders(value, new PlaceholderResolver() {
-            public String resolvePlaceholder(String placeholderName) {
+        return replacePlaceholders(resolveContext, value, new PlaceholderResolver() {
+            public String resolvePlaceholder(final Object resolveContext, final String placeholderName) {
                 return properties.getProperty(placeholderName);
             }
         }, visitedPlaceholders);
@@ -107,15 +107,21 @@ public class PropertyPlaceholderHelper {
      * @param placeholderResolver the <code>PlaceholderResolver</code> to use for replacement.
      * @return the supplied value with placeholders replaced inline.
      */
-    public String replacePlaceholders(final String value, final PlaceholderResolver placeholderResolver, 
+    public String replacePlaceholders(
+            final Object resolveContext, 
+            final String value, 
+            final PlaceholderResolver placeholderResolver, 
             final Set<String> visitedPlaceholders) {
         _assertNotNull(value, "Argument 'value' must not be null.");
-        return parseStringValue(value, placeholderResolver, 
+        return parseStringValue(resolveContext, value, placeholderResolver, 
                 null != visitedPlaceholders ? visitedPlaceholders : new HashSet<String>());
     }
 
     protected String parseStringValue(
-            final String strVal, final PlaceholderResolver placeholderResolver, final Set<String> visitedPlaceholders) {
+            final Object resolveContext,
+            final String strVal, 
+            final PlaceholderResolver placeholderResolver, 
+            final Set<String> visitedPlaceholders) {
 
         if ( LOG.isDebugEnabled() ) {
             LOG.debug("in parseStringValue for: {}", strVal);
@@ -133,19 +139,19 @@ public class PropertyPlaceholderHelper {
                             "Circular placeholder reference '" + placeholder + "' in property definitions");
                 }
                 // Recursive invocation, parsing placeholders contained in the placeholder key.
-                placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
+                placeholder = parseStringValue(resolveContext, placeholder, placeholderResolver, visitedPlaceholders);
 
                 if ( LOG.isDebugEnabled() ) {
                     LOG.debug("found placeholder: {}", placeholder);
                 }
                 // Now obtain the value for the fully resolved key...
-                String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+                String propVal = placeholderResolver.resolvePlaceholder(resolveContext, placeholder);
                 if (propVal == null && this.valueSeparator != null) {
                     int separatorIndex = placeholder.indexOf(this.valueSeparator);
                     if (separatorIndex != -1) {
                         String actualPlaceholder = placeholder.substring(0, separatorIndex);
                         String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
-                        propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
+                        propVal = placeholderResolver.resolvePlaceholder(resolveContext, actualPlaceholder);
                         if (propVal == null) {
                             propVal = defaultValue;
                         }
@@ -154,7 +160,7 @@ public class PropertyPlaceholderHelper {
                 if (propVal != null) {
                     // Recursive invocation, parsing placeholders contained in the
                     // previously resolved placeholder value.
-                    propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+                    propVal = parseStringValue(resolveContext, propVal, placeholderResolver, visitedPlaceholders);
                     buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
                     recordResolvedPlaceholder(placeholder, propVal);
                     if (LOG.isTraceEnabled()) {
@@ -182,7 +188,7 @@ public class PropertyPlaceholderHelper {
         return buf.toString();
     }
 
-    private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
+    private int findPlaceholderEndIndex(final CharSequence buf, final int startIndex) {
         int index = startIndex + this.placeholderPrefix.length();
         int withinNestedPlaceholder = 0;
         while (index < buf.length()) {
@@ -217,7 +223,7 @@ public class PropertyPlaceholderHelper {
          * @param placeholderName the name of the placeholder to resolve
          * @return the replacement value or {@code null} if no replacement is to be made
          */
-        String resolvePlaceholder(final String placeholderName);
+        String resolvePlaceholder(final Object resolveContext, final String placeholderName);
     }
     
     private static boolean _substringMatch(final CharSequence str, int index, final CharSequence substring) {
