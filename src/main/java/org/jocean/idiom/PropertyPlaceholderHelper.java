@@ -236,7 +236,7 @@ public class PropertyPlaceholderHelper {
         }
     }
     
-    public void recordResolvedPlaceholder(final String placeholder, final String propVal) {
+    private void recordResolvedPlaceholder(final String placeholder, final String propVal) {
         if ( null != this._recordResolvedPlaceholder ) {
             try {
                 this._recordResolvedPlaceholder.visit(placeholder, propVal);
