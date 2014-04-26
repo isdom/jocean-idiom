@@ -22,6 +22,10 @@ public class PooledBytesOutputStream extends OutputStream {
         this._pool = pool;
     }
 
+    public ByteArrayPool pool() {
+        return this._pool;
+    }
+    
     public Blob drainToBlob() {
         
         this._guard.enter(null);
