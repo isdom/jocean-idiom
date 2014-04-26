@@ -35,6 +35,7 @@ public class PooledBytesOutputStream extends OutputStream {
                 bytes.release();
             }
             this._bytesList.clear();
+            this._writePosition = 0;
         }
         finally {
             this._guard.leave(null);
