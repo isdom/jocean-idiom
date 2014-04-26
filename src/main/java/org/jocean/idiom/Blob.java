@@ -1,8 +1,7 @@
-package org.jocean.idiom.pool;
+package org.jocean.idiom;
 
 import java.io.InputStream;
 
-import org.jocean.idiom.ReferenceCounted;
 
 /**
  * @author isdom

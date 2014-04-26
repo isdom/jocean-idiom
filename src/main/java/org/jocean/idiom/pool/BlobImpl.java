@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jocean.idiom.AbstractReferenceCounted;
+import org.jocean.idiom.Blob;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 
 /**

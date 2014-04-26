@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jocean.idiom.Blob;
 import org.jocean.idiom.ConcurrentInvokeGuard;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 
