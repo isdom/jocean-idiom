@@ -27,6 +27,20 @@ public class PooledBytesOutputStream extends OutputStream {
         return this._pool;
     }
     
+    public void clear() {
+        this._guard.enter(null);
+        
+        try {
+            for ( Ref<byte[]> bytes : this._bytesList ) {
+                bytes.release();
+            }
+            this._bytesList.clear();
+        }
+        finally {
+            this._guard.leave(null);
+        }
+    }
+    
     public Blob drainToBlob() {
         
         this._guard.enter(null);
@@ -74,17 +88,7 @@ public class PooledBytesOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        this._guard.enter(null);
-        
-        try {
-            for ( Ref<byte[]> bytes : this._bytesList ) {
-                bytes.release();
-            }
-            this._bytesList.clear();
-        }
-        finally {
-            this._guard.leave(null);
-        }
+        clear();
     }
     
     private byte[] currentBytes() {
