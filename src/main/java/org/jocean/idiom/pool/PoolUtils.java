@@ -41,11 +41,6 @@ public class PoolUtils {
         }
         finally {
             bytes.release();
-            try {
-                is.close();
-            } catch (IOException e) {
-                // just ignore
-            }
         }
         return totalBytes;
     }
