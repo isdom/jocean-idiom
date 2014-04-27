@@ -62,6 +62,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
      */
     protected int markIdxOfBuf = 0;
     protected int markPosInBuf = 0;
+    protected int markTotalPos = 0;
 
     /**
      * The index one greater than the last valid character in the input 
@@ -266,6 +267,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         try {
             this.markIdxOfBuf = this.idxOfBuf;
             this.markPosInBuf = this.posInBuf;
+            this.markTotalPos = this.totalPos;
         }
         finally {
             this._guard.leave(null);
@@ -283,6 +285,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         try {
             this.idxOfBuf = this.markIdxOfBuf;
             this.posInBuf = this.markPosInBuf;
+            this.totalPos = this.markTotalPos;
         }
         finally {
             this._guard.leave(null);
