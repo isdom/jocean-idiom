@@ -21,7 +21,7 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
             final int retainedCount = addToRetained(obj);
             if ( LOG.isTraceEnabled() ) {
                 LOG.trace("AbstractObjectPool: retainObject({}) succeed, now idle {}/retained {}", 
-                        obj, idleCount, retainedCount);
+                        obj.getClass(), idleCount, retainedCount);
             }
             return new RefImpl(obj);
         }
@@ -35,7 +35,7 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
             final int retainedCount = addToRetained(newobj);
             if ( LOG.isTraceEnabled() ) {
                 LOG.trace("AbstractObjectPool: retainObject({}) succeed, now idle {}/retained {}", 
-                        newobj, this._idleCounter.get(), retainedCount);
+                        newobj.getClass(), this._idleCounter.get(), retainedCount);
             }
             return new RefImpl(newobj);
         }
@@ -102,7 +102,7 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
             final int retainedCount = removeFromRetained(obj);
             if ( LOG.isTraceEnabled() ) {
                 LOG.trace("AbstractObjectPool: returnObject({}) succeed, now idle {}/retained {}", 
-                        obj, idleCount, retainedCount);
+                        obj.getClass(), idleCount, retainedCount);
             }
         }
     }
