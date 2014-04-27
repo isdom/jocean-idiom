@@ -3,7 +3,6 @@
  */
 package org.jocean.idiom.pool;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.jocean.idiom.ExceptionUtils;
@@ -36,7 +35,7 @@ public class PoolUtils {
             }
         }
         catch(Exception e) {
-            LOG.warn("exception when read bytebuf's content, detail: {}", 
+            LOG.warn("exception when inputStream -> OutputStream, detail: {}", 
                     ExceptionUtils.exception2detail(e) );
         }
         finally {
