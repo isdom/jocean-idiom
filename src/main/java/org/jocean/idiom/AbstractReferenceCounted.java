@@ -88,6 +88,24 @@ public abstract class AbstractReferenceCounted<T extends ReferenceCounted<?>> im
     }
 
     @Override
+    public T tryRetain() {
+        for (;;) {
+            int refCnt = this.refCnt;
+            if (refCnt == 0) {
+//                throw new IllegalReferenceCountException(0, 1);
+                return null;
+            }
+            if (refCnt == Integer.MAX_VALUE) {
+                throw new IllegalReferenceCountException(Integer.MAX_VALUE, 1);
+            }
+            if (refCntUpdater.compareAndSet(this, refCnt, refCnt + 1)) {
+                break;
+            }
+        }
+        return (T)this;
+    }
+    
+    @Override
     public final boolean release() {
         for (;;) {
             int refCnt = this.refCnt;

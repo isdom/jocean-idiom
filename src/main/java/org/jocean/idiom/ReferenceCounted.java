@@ -46,6 +46,12 @@ public interface ReferenceCounted<T extends ReferenceCounted<?>> {
     T retain(int increment);
 
     /**
+     * try to retain T, if previous refCnt > 0 then increases the reference count by {@code 1}.
+     *    otherwise return null
+     */
+    T tryRetain();
+    
+    /**
      * Decreases the reference count by {@code 1} and deallocates this object if the reference count reaches at
      * {@code 0}.
      *
