@@ -21,8 +21,16 @@ public class ByteArrayPool extends AbstractObjectPool<byte[]> {
         return new byte[this._blockSize];
     }
 
+    public int getTotalIdleSizeInByte() {
+        return this.getIdleCount() * this._blockSize;
+    }
+    
+    public int getTotalRetainedSizeInByte() {
+        return this.getRetainedCount() * this._blockSize;
+    }
+    
     public int getTotalSizeInByte() {
-        return this.getIdleCount() * _blockSize;
+        return (this.getIdleCount() + this.getRetainedCount() ) * this._blockSize;
     }
     
     public int getBlockSize() {
