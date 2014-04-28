@@ -49,7 +49,7 @@ public class PoolUtils {
         return totalBytes;
     }
 
-    public static Blob file2Blob(final File file, final ByteArrayPool pool) {
+    public static Blob file2Blob(final File file, final BytesPool pool) {
         InputStream is = null;
         PooledBytesOutputStream os = null;
         
@@ -78,5 +78,13 @@ public class PoolUtils {
             }
         }
         return null;
+    }
+    
+    public static BytesPool createCachedBytesPool(final int blockSize) {
+        return new CachedBytesPool(blockSize);
+    }
+    
+    public static BytesPool createDefaultBytesPool(final int blockSize) {
+        return new DefaultBytesPool(blockSize);
     }
 }

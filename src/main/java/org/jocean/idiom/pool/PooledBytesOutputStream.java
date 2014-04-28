@@ -19,11 +19,11 @@ import org.jocean.idiom.pool.ObjectPool.Ref;
  */
 public class PooledBytesOutputStream extends OutputStream {
 
-    public PooledBytesOutputStream(final ByteArrayPool pool) {
+    public PooledBytesOutputStream(final BytesPool pool) {
         this._pool = pool;
     }
 
-    public ByteArrayPool pool() {
+    public BytesPool pool() {
         return this._pool;
     }
     
@@ -109,7 +109,7 @@ public class PooledBytesOutputStream extends OutputStream {
     private final List<Ref<byte[]>> _bytesList = 
             new LinkedList<Ref<byte[]>>();
     
-    private final ByteArrayPool _pool;
+    private final BytesPool _pool;
     
     private final ConcurrentInvokeGuard _guard = new ConcurrentInvokeGuard();
 }

@@ -7,11 +7,12 @@ package org.jocean.idiom.pool;
  * @author isdom
  *
  */
-public class ByteArrayPool extends AbstractObjectPool<byte[]> {
+class CachedBytesPool extends AbstractCachedObjectPool<byte[]> 
+    implements BytesPool, CachedObjectPool<byte[]> {
 
-    public ByteArrayPool(final int blockSize) {
+    public CachedBytesPool(final int blockSize) {
         if ( blockSize <= 0 ) {
-            throw new IllegalArgumentException("blockSize for ByteArrayPool must more than zero.");
+            throw new IllegalArgumentException("blockSize for CachedBytesPool must more than zero.");
         }
         this._blockSize = blockSize;
     }
@@ -21,18 +22,22 @@ public class ByteArrayPool extends AbstractObjectPool<byte[]> {
         return new byte[this._blockSize];
     }
 
-    public int getTotalIdleSizeInByte() {
-        return this.getIdleCount() * this._blockSize;
+    @Override
+    public int getTotalCachedSizeInByte() {
+        return this.getCachedCount() * this._blockSize;
     }
-    
+
+    @Override
     public int getTotalRetainedSizeInByte() {
         return this.getRetainedCount() * this._blockSize;
     }
     
+    @Override
     public int getTotalSizeInByte() {
-        return (this.getIdleCount() + this.getRetainedCount() ) * this._blockSize;
+        return (this.getCachedCount() + this.getRetainedCount() ) * this._blockSize;
     }
     
+    @Override
     public int getBlockSize() {
         return this._blockSize;
     }

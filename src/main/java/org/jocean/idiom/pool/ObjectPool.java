@@ -10,8 +10,4 @@ public interface ObjectPool<T> {
     }
     
     public Ref<T> retainObject();
-    
-    public int getIdleCount();
-    
-    public int getRetainedCount();
 }
