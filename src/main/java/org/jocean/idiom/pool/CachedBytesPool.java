@@ -7,7 +7,7 @@ package org.jocean.idiom.pool;
  * @author isdom
  *
  */
-class CachedBytesPool extends AbstractCachedObjectPool<byte[]> 
+public class CachedBytesPool extends AbstractCachedObjectPool<byte[]> 
     implements BytesPool, CachedObjectPool<byte[]> {
 
     public CachedBytesPool(final int blockSize) {

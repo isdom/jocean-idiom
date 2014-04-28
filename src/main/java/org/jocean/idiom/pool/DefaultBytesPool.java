@@ -1,6 +1,6 @@
 package org.jocean.idiom.pool;
 
-class DefaultBytesPool extends AbstractObjectPool<byte[]> 
+public class DefaultBytesPool extends AbstractObjectPool<byte[]> 
     implements BytesPool {
 
     public DefaultBytesPool(final int blockSize) {
