@@ -3,8 +3,12 @@
  */
 package org.jocean.idiom.pool;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.jocean.idiom.Blob;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 import org.slf4j.Logger;
@@ -18,7 +22,8 @@ public class PoolUtils {
     private static final Logger LOG =
             LoggerFactory.getLogger(PoolUtils.class);
     
-    public static long inputStream2OutputStream(final InputStream is, final PooledBytesOutputStream os) {
+    public static long inputStream2OutputStream(
+            final InputStream is, final PooledBytesOutputStream os) {
         long totalBytes = 0;
         final Ref<byte[]> bytes = os.pool().retainObject();
         try {
@@ -44,4 +49,34 @@ public class PoolUtils {
         return totalBytes;
     }
 
+    public static Blob file2Blob(final File file, final ByteArrayPool pool) {
+        InputStream is = null;
+        PooledBytesOutputStream os = null;
+        
+        try {
+            is = new FileInputStream(file);
+            os = new PooledBytesOutputStream(pool);
+            inputStream2OutputStream(is, os);
+            return os.drainToBlob();
+        }
+        catch(Exception e) {
+            LOG.warn("exception when file2Blob for file {}, detail: {}", 
+                    file, ExceptionUtils.exception2detail(e) );
+        }
+        finally {
+            if ( null != is ) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+            if ( null != os ) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        return null;
+    }
 }
