@@ -74,7 +74,7 @@ public class PooledBytesOutputStream extends OutputStream
             currentBytes[this._inBlockWriteIndex++] = (byte)b;
             this._writeIndex++;
             if ( this._inBlockWriteIndex >= currentBytes.length ) {
-                ensureCapacity(this._writeIndex);
+                ensureCapacity(this._writeIndex + 1);
                 this._blockIndex++;
                 this._inBlockWriteIndex = 0;
             }
@@ -121,7 +121,6 @@ public class PooledBytesOutputStream extends OutputStream
         this._guard.enter(null);
         
         try {
-            ensureCapacity(index+1);
             final int blockidx = index / this._pool.getBlockSize();
             final int inBlockIdx = index % this._pool.getBlockSize();
             this._bytesList.get( blockidx ).object()[inBlockIdx] = (byte)b;
@@ -148,12 +147,12 @@ public class PooledBytesOutputStream extends OutputStream
     }
     
     private void ensureCapacity(int capacity) {
-        while ( capacity() < capacity ) {
+        while ( rawCapacity() < capacity ) {
             addMoreBytes();
         }
     }
     
-    private int capacity() {
+    private int rawCapacity() {
         return this._bytesList.size() * this._pool.getBlockSize();
     }
 
