@@ -20,6 +20,8 @@ final class BlobImpl extends AbstractReferenceCounted<Blob> implements Blob {
 
     BlobImpl(final Collection<Ref<byte[]>> bytesCollecion, 
             final int length) {
+        // TODO, test if bytesCollection 's total size >= length
+        //  and furthermore we can release unused bytes
         this._bytesList = new ArrayList<Ref<byte[]>>(bytesCollecion.size());
         for ( Ref<byte[]> bytes : bytesCollecion ) {
             this._bytesList.add(bytes.retain());
