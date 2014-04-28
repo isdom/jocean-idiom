@@ -36,7 +36,7 @@ public class CountedTrigger {
     public void decrement() {
         final int count = this._counter.decrementAndGet();
         if ( count < 0 ) {
-            throw new RuntimeException("Internal Error: _idleCounter.decrementAndGet()'s result < 0");
+            throw new RuntimeException("Internal Error: counter.decrementAndGet()'s result < 0");
         }
         if ( count == 0 ) {
             this._reactor.onDecrementToZero();

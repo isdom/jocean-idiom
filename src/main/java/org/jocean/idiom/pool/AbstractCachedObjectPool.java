@@ -16,27 +16,27 @@ public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T>
 
     @Override
     public Ref<T> retainObject() {
-        final T obj = this._idles.poll();
+        final T obj = this._caches.poll();
         if ( null != obj ) {
-            final int idleCount = this._idleCounter.decrementAndGet();
+            final int cachedCount = this._cachedCounter.decrementAndGet();
             final int retainedCount = addToRetained(obj);
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("AbstractCachedObjectPool: retainObject({}) succeed, now idle {}/retained {}", 
-                        obj.getClass(), idleCount, retainedCount);
+                LOG.trace("AbstractCachedObjectPool: retainObject({}) succeed, now cached {}/retained {}", 
+                        obj.getClass(), cachedCount, retainedCount);
             }
             return new RefImpl(obj);
         }
         else {
             final T newobj = createObject();
             if ( null == newobj ) {
-                LOG.trace("AbstractCachedObjectPool: createObject return null, current retained {} and idles {}",
-                        this._retainedCounter.get(), this._idleCounter.get());
+                LOG.error("AbstractCachedObjectPool: createObject return null, current cached {}/retained {}",
+                        this._cachedCounter.get(), this._retainedCounter.get());
                 throw new IllegalStateException("AbstractCachedObjectPool: createObject return null");
             }
             final int retainedCount = addToRetained(newobj);
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("AbstractCachedObjectPool: retainObject({}) succeed, now idle {}/retained {}", 
-                        newobj.getClass(), this._idleCounter.get(), retainedCount);
+                LOG.trace("AbstractCachedObjectPool: retainObject({}) succeed, now cached {}/retained {}", 
+                        newobj.getClass(), this._cachedCounter.get(), retainedCount);
             }
             return new RefImpl(newobj);
         }
@@ -47,8 +47,7 @@ public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T>
      */
     private int addToRetained(final T newobj) {
         if ( this._retains.offer(newobj) ) {
-            final int objCount = this._retainedCounter.incrementAndGet();
-            return objCount;
+            return this._retainedCounter.incrementAndGet();
         }
         else {
             return this._retainedCounter.get();
@@ -60,8 +59,7 @@ public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T>
      */
     private int removeFromRetained(final T obj) {
         if ( this._retains.remove(obj) ) {
-            final int objCount = this._retainedCounter.decrementAndGet();
-            return objCount;
+            return this._retainedCounter.decrementAndGet();
         }
         else {
             return this._retainedCounter.get();
@@ -70,7 +68,7 @@ public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T>
     
     @Override
     public int getCachedCount() {
-        return this._idleCounter.get();
+        return this._cachedCounter.get();
     }
     
     @Override
@@ -105,20 +103,20 @@ public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T>
     }
     
     private void returnObject(final T obj) {
-        if ( this._idles.offer(obj) ) {
-            final int idleCount = this._idleCounter.incrementAndGet();
+        if ( this._caches.offer(obj) ) {
+            final int cachedCount = this._cachedCounter.incrementAndGet();
             final int retainedCount = removeFromRetained(obj);
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("AbstractCachedObjectPool: returnObject({}) succeed, now idle {}/retained {}", 
-                        obj.getClass(), idleCount, retainedCount);
+                LOG.trace("AbstractCachedObjectPool: returnObject({}) succeed, now cached {}/retained {}", 
+                        obj.getClass(), cachedCount, retainedCount);
             }
         }
     }
 
     protected abstract T createObject();
     
-    protected final Queue<T> _idles = new ConcurrentLinkedQueue<T>();
+    protected final Queue<T> _caches = new ConcurrentLinkedQueue<T>();
     protected final Queue<T> _retains = new ConcurrentLinkedQueue<T>();
-    protected final AtomicInteger _idleCounter = new AtomicInteger(0);
+    protected final AtomicInteger _cachedCounter = new AtomicInteger(0);
     protected final AtomicInteger _retainedCounter = new AtomicInteger(0);
 }
