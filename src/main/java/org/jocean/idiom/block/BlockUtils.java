@@ -8,6 +8,7 @@ import java.io.InputStream;
 import org.jocean.idiom.Blob;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.pool.BytesPool;
+import org.jocean.idiom.pool.IntsPool;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,5 +73,9 @@ public abstract class BlockUtils {
             }
         }
         return null;
+    }
+    
+    public static WriteableInts createWriteableInts(final IntsPool pool) {
+        return new WriteableIntsImpl(pool);
     }
 }
