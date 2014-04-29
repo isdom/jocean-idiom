@@ -1,6 +1,8 @@
-package org.jocean.idiom;
+package org.jocean.idiom.block;
 
 import java.io.InputStream;
+
+import org.jocean.idiom.ReferenceCounted;
 
 
 /**

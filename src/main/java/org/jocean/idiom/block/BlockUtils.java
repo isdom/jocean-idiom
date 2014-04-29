@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.jocean.idiom.Blob;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.pool.BytesPool;
 import org.jocean.idiom.pool.IntsPool;

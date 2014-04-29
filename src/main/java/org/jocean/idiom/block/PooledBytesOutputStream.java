@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.jocean.idiom.Blob;
 import org.jocean.idiom.ConcurrentInvokeGuard;
 import org.jocean.idiom.Pair;
 import org.jocean.idiom.pool.BytesPool;
