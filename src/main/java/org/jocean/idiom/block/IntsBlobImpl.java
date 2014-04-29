@@ -49,6 +49,16 @@ final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob>
         return this._blocks.get(idx).object();
     }
 
+    @Override
+    public void writeAt(int index, int data) {
+        getBlockAt(index / this._sizePerBlock)[index % this._sizePerBlock] = data;
+    }
+
+    @Override
+    public int getAt(int index) {
+        return getBlockAt(index / this._sizePerBlock)[index % this._sizePerBlock];
+    }
+    
     private final List<Ref<int[]>> _blocks;
     private final int _length;
     private final int _sizePerBlock;
