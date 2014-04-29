@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jocean.idiom.pool;
+package org.jocean.idiom.block;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.jocean.idiom.AbstractReferenceCounted;
 import org.jocean.idiom.Blob;
+import org.jocean.idiom.ReferenceCounted;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 
 /**
@@ -18,14 +19,13 @@ import org.jocean.idiom.pool.ObjectPool.Ref;
  */
 final class BlobImpl extends AbstractReferenceCounted<Blob> implements Blob {
 
-    BlobImpl(final Collection<Ref<byte[]>> bytesCollecion, 
+    BlobImpl(final Collection<Ref<byte[]>> blocks, 
             final int length) {
         // TODO, test if bytesCollection 's total size >= length
         //  and furthermore we can release unused bytes
-        this._bytesList = new ArrayList<Ref<byte[]>>(bytesCollecion.size());
-        for ( Ref<byte[]> bytes : bytesCollecion ) {
-            this._bytesList.add(bytes.retain());
-        }
+        this._blocks = new ArrayList<Ref<byte[]>>(blocks.size());
+        
+        ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
         
         this._length = length;
     }
@@ -37,17 +37,14 @@ final class BlobImpl extends AbstractReferenceCounted<Blob> implements Blob {
 
     @Override
     public InputStream genInputStream() {
-        return new ReferenceCountedBytesListInputStream(this._bytesList, this._length);
+        return new ReferenceCountedBytesListInputStream(this._blocks, this._length);
     }
 
     @Override
     protected void deallocate() {
-        for ( Ref<byte[]> bytes : this._bytesList ) {
-            bytes.release();
-        }
-        this._bytesList.clear();
+        ReferenceCounted.Utils.releaseAllAndClear(this._blocks);
     }
     
-    private final List<Ref<byte[]>> _bytesList;
+    private final List<Ref<byte[]>> _blocks;
     private final int _length;
 }

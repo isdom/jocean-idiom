@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jocean.idiom;
+package org.jocean.idiom.block;
 
 /**
  * @author isdom

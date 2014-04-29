@@ -1,12 +1,11 @@
 /**
  * 
  */
-package org.jocean.idiom.pool;
+package org.jocean.idiom.block;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.jocean.idiom.ConcurrentInvokeGuard;
 import org.jocean.idiom.pool.ObjectPool.Ref;
@@ -17,68 +16,6 @@ import org.jocean.idiom.pool.ObjectPool.Ref;
  */
 final class ReferenceCountedBytesListInputStream extends InputStream {
 
-    private final ConcurrentInvokeGuard _guard = 
-            new ConcurrentInvokeGuard();
-    
-    /**
-     * An array of bytes that was provided
-     * by the creator of the stream. Elements <code>buf[0]</code>
-     * through <code>buf[count-1]</code> are the
-     * only bytes that can ever be read from the
-     * stream;  element <code>buf[pos]</code> is
-     * the next byte to be read.
-     */
-    protected final List<Ref<byte[]>> bufs;
-
-    /**
-     * The index of the next character to read from the input stream buffer.
-     * This value should always be nonnegative
-     * and not larger than the value of <code>count</code>.
-     * The next byte to be read from the input stream buffer 
-     * will be <code>buf[pos]</code>.
-     */
-    
-    //	目前在第几个buf
-    protected int idxOfBuf = 0;
-    
-    //	当前的buf中的位置
-    protected int posInBuf = 0;
-    
-    //	总位置
-    protected int totalPos = 0;
-    
-    /**
-     * The currently marked position in the stream.
-     * ByteArrayInputStream objects are marked at position zero by
-     * default when constructed.  They may be marked at another
-     * position within the buffer by the <code>mark()</code> method.
-     * The current buffer position is set to this point by the
-     * <code>reset()</code> method.
-     * <p>
-     * If no mark has been set, then the value of mark is the offset
-     * passed to the constructor (or 0 if the offset was not supplied).
-     *
-     * @since   JDK1.1
-     */
-    protected int markIdxOfBuf = 0;
-    protected int markPosInBuf = 0;
-    protected int markTotalPos = 0;
-
-    /**
-     * The index one greater than the last valid character in the input 
-     * stream buffer. 
-     * This value should always be nonnegative
-     * and not larger than the length of <code>buf</code>.
-     * It  is one greater than the position of
-     * the last byte within <code>buf</code> that
-     * can ever be read  from the input stream buffer.
-     */
-    protected int count = 0;
-
-    private byte[] currentBuf() {
-    	return	bufs.get(idxOfBuf).object();
-    }
-    
     /**
      * Creates a <code>ByteArrayInputStream</code>
      * so that it  uses <code>buf</code> as its
@@ -91,14 +28,9 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
      *
      * @param   buf   the input buffer.
      */
-    public ReferenceCountedBytesListInputStream(
-            final List<Ref<byte[]>> bufs, final int length) {
-    	this.bufs = new ArrayList<Ref<byte[]>>(bufs.size());
-    	for ( Ref<byte[]> bytes : bufs ) {
-    	    this.bufs.add(bytes.retain());
-    	}
-    	
-    	this.count = length;
+    ReferenceCountedBytesListInputStream(
+            final Collection<Ref<byte[]>> blocks, final int length) {
+        this._support = new BlocksReadableSupport<byte[]>(blocks, length);
     }
 
     /**
@@ -119,21 +51,13 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         this._guard.enter(null);
         
         try {
-            while ( this.idxOfBuf < this.bufs.size() 
-                && this.available() > 0 ) {
-                final byte[] buf = currentBuf();
-                
-                if ( this.posInBuf < buf.length ) {
-                    this.totalPos++;
-                    return  (buf[this.posInBuf++] & 0xff);
-                }
-                else {
-                    this.idxOfBuf++;
-                    this.posInBuf = 0;
-                }
+            if ( this._support.available() > 0 ) {
+                final byte[] block = this._support.currentBlock();
+                return (block[this._support.getAndIncrementReadPositionInBlock()] & 0xff);
             }
-            
-            return -1;
+            else {
+                return -1;
+            }
         }
         finally {
             this._guard.leave(null);
@@ -228,7 +152,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         this._guard.enter(null);
         
         try {
-            return this.count - this.totalPos;
+            return this._support.available();
         }
         finally {
             this._guard.leave(null);
@@ -265,9 +189,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         this._guard.enter(null);
         
         try {
-            this.markIdxOfBuf = this.idxOfBuf;
-            this.markPosInBuf = this.posInBuf;
-            this.markTotalPos = this.totalPos;
+            this.markedPosition = this._support.currentPosition();
         }
         finally {
             this._guard.leave(null);
@@ -283,9 +205,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         this._guard.enter(null);
         
         try {
-            this.idxOfBuf = this.markIdxOfBuf;
-            this.posInBuf = this.markPosInBuf;
-            this.totalPos = this.markTotalPos;
+            this._support.adjustReadPositionTo( this.markedPosition);
         }
         finally {
             this._guard.leave(null);
@@ -302,13 +222,16 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         this._guard.enter(null);
         
         try {
-            for ( Ref<byte[]> bytes : this.bufs ) {
-                bytes.release();
-            }
-            this.bufs.clear();
+            this._support.clear();
         }
         finally {
             this._guard.leave(null);
         }
     }
+    
+    private final BlocksReadableSupport<byte[]> _support;
+    private int markedPosition = 0;
+    
+    private final ConcurrentInvokeGuard _guard = 
+            new ConcurrentInvokeGuard();
 }

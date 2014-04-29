@@ -87,6 +87,7 @@ public abstract class AbstractReferenceCounted<T extends ReferenceCounted<?>> im
         return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T tryRetain() {
         for (;;) {

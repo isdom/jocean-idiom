@@ -15,6 +15,8 @@
  */
 package org.jocean.idiom;
 
+import java.util.Collection;
+
 /**
  * A reference-counted object that requires explicit deallocation.
  * <p>
@@ -30,6 +32,23 @@ package org.jocean.idiom;
  * </p>
  */
 public interface ReferenceCounted<T extends ReferenceCounted<?>> {
+    
+    public static class Utils {
+        public static <T extends ReferenceCounted<T>> void releaseAllAndClear(final Collection<T> refs) {
+            for ( T ref : refs ) {
+                ref.release();
+            }
+            refs.clear();
+        }
+        
+        public static <T extends ReferenceCounted<T>> void copyAllAndRetain(
+                final Collection<T> from, final Collection<T> to) {
+            for ( T ref : from ) {
+                to.add(ref.retain());
+            }
+        }
+    }
+    
     /**
      * Returns the reference count of this object.  If {@code 0}, it means this object has been deallocated.
      */
