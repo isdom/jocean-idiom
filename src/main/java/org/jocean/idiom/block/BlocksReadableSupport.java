@@ -21,7 +21,7 @@ public class BlocksReadableSupport<T> {
             final Collection<Ref<T>> blocks, final int length) {
         this._blocks = new ArrayList<Ref<T>>(blocks.size());
         ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
-        this._blockSize = Array.getLength( this._blocks.get(0) );
+        this._blockSize = Array.getLength( this._blocks.get(0).object() );
         this._length = length;
     }
     
