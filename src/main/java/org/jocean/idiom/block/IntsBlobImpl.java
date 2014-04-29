@@ -16,6 +16,7 @@ final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob>
         
         ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
         this._length = length;
+        this._sizePerBlock = this._blocks.get(0).object().length;
     }
     
     @Override
@@ -32,7 +33,23 @@ final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob>
     public ReadableInts genReadable() {
         return new ReadableIntsImpl(this._blocks, this._length);
     }
+    
+    @Override
+    public int sizePerBlock() {
+        return this._sizePerBlock;
+    }
+
+    @Override
+    public int totalBlockCount() {
+        return this._blocks.size();
+    }
+
+    @Override
+    public int[] getBlockAt(int idx) {
+        return this._blocks.get(idx).object();
+    }
 
     private final List<Ref<int[]>> _blocks;
     private final int _length;
+    private final int _sizePerBlock;
 }

@@ -2,7 +2,7 @@ package org.jocean.idiom.block;
 
 import org.jocean.idiom.ReferenceCounted;
 
-public interface IntsBlob extends ReferenceCounted<IntsBlob> {
+public interface IntsBlob extends ReferenceCounted<IntsBlob>, RandomAccessBlocks<int[]> {
 
     public static class Utils {
         public static ReadableInts releaseAndGenReadable(final IntsBlob blob) {
