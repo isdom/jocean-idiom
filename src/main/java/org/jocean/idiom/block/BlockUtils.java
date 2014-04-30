@@ -77,4 +77,8 @@ public abstract class BlockUtils {
     public static WriteableInts createWriteableInts(final IntsPool pool) {
         return new WriteableIntsImpl(pool);
     }
+
+    public static IntsBlob createIntsBlob(final int size, final IntsPool pool) {
+        return new IntsBlobImpl(size, pool);
+    }
 }

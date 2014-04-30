@@ -17,8 +17,23 @@ final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob>
         
         ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
         this._length = length;
-        this._sizePerBlock = this._blocks.get(0).object().length;
+        this._sizePerBlock = pool.getBlockSize();
         this._pool = pool;
+    }
+    
+    IntsBlobImpl(final int length, final IntsPool pool) {
+        if ( length <= 0 ) {
+            throw new IllegalArgumentException("IntsBlobImpl's length must > 0");
+        }
+        this._length = length;
+        this._sizePerBlock = pool.getBlockSize();
+        this._pool = pool;
+        
+        final int blockCount = (length + this._sizePerBlock - 1) / this._sizePerBlock;
+        this._blocks = new ArrayList<Ref<int[]>>(blockCount);
+        for ( int idx=0; idx < blockCount; idx++) {
+            this._blocks.add(pool.retainObject());
+        }
     }
     
     @Override
