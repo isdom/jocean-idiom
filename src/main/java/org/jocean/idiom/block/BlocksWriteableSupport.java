@@ -19,6 +19,7 @@ public class BlocksWriteableSupport<T> {
     
     public BlocksWriteableSupport(final BlockPool<T> pool) {
         this._pool = pool;
+        this._sizePerBlock = pool.getBlockSize();
     }
     
     @SuppressWarnings("unchecked")
@@ -36,17 +37,17 @@ public class BlocksWriteableSupport<T> {
     }
     
     public T getBlockAt(final int pos) {
-        return this._blocks.get( pos / this._pool.getBlockSize() ).object();
+        return this._blocks.get( pos / this._sizePerBlock ).object();
     }
     
     public int getWritePositionInBlockAt(final int pos) {
-        return pos % this._pool.getBlockSize();
+        return pos % this._sizePerBlock;
     }
     
     public int getAndIncrementWritePositionInBlock() {
         final int inBlockWritePos = this._inBlockWriteIndex++;
         this._globalWriteIndex++;
-        if ( this._inBlockWriteIndex >= this._pool.getBlockSize() ) {
+        if ( this._inBlockWriteIndex >= this._sizePerBlock ) {
             ensureCapacity(this._globalWriteIndex + 1);
             this._blockIndex++;
             this._inBlockWriteIndex = 0;
@@ -63,8 +64,8 @@ public class BlocksWriteableSupport<T> {
     
     public void adjustWritePositionTo(final int pos) {
         this._globalWriteIndex = pos;
-        this._blockIndex = pos / this._pool.getBlockSize();
-        this._inBlockWriteIndex = pos % this._pool.getBlockSize();
+        this._blockIndex = pos / this._sizePerBlock;
+        this._inBlockWriteIndex = pos % this._sizePerBlock;
     }
     
     public T currentBlock() {
@@ -85,7 +86,7 @@ public class BlocksWriteableSupport<T> {
     }
     
     private int rawCapacity() {
-        return this._blocks.size() * this._pool.getBlockSize();
+        return this._blocks.size() * this._sizePerBlock;
     }
     
     private int _inBlockWriteIndex = 0;
@@ -96,4 +97,5 @@ public class BlocksWriteableSupport<T> {
             new ArrayList<Ref<T>>();
     
     private final BlockPool<T> _pool;
+    private final int _sizePerBlock;
 }

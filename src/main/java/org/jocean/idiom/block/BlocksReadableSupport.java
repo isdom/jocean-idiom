@@ -21,14 +21,14 @@ public class BlocksReadableSupport<T> {
             final Collection<Ref<T>> blocks, final int length) {
         this._blocks = new ArrayList<Ref<T>>(blocks.size());
         ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
-        this._blockSize = Array.getLength( this._blocks.get(0).object() );
+        this._sizePerBlock = Array.getLength( this._blocks.get(0).object() );
         this._length = length;
     }
     
     public int getAndIncrementReadPositionInBlock() {
         final int inBlockWritePos = this._inBlockReadIndex++;
         this._globalReadIndex++;
-        if ( this._inBlockReadIndex >= this._blockSize ) {
+        if ( this._inBlockReadIndex >= this._sizePerBlock ) {
             this._blockIndex++;
             this._inBlockReadIndex = 0;
         }
@@ -48,8 +48,8 @@ public class BlocksReadableSupport<T> {
     
     public void adjustReadPositionTo(final int pos) {
         this._globalReadIndex = pos;
-        this._blockIndex = pos / this._blockSize;
-        this._inBlockReadIndex = pos % this._blockSize;
+        this._blockIndex = pos / this._sizePerBlock;
+        this._inBlockReadIndex = pos % this._sizePerBlock;
     }
     
     public T currentBlock() {
@@ -79,6 +79,6 @@ public class BlocksReadableSupport<T> {
      */
     private final List<Ref<T>> _blocks;
     
-    private final int _blockSize;
+    private final int _sizePerBlock;
     private final int _length;
 }

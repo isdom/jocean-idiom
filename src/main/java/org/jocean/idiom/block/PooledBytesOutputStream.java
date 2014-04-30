@@ -18,7 +18,7 @@ import org.jocean.idiom.pool.ObjectPool.Ref;
  *
  */
 public class PooledBytesOutputStream extends OutputStream 
-    implements RandomAccessBytes {
+    implements RandomAccessBytes, AdjustableBytes {
 
     public PooledBytesOutputStream(final BytesPool pool) {
         this._support = new BlocksWriteableSupport<byte[]>(pool);
@@ -68,7 +68,7 @@ public class PooledBytesOutputStream extends OutputStream
             this._guard.leave(null);
         }
     }
-
+    
     @Override
     public void setCapacity(final int capacity) {
         this._guard.enter(null);
@@ -106,6 +106,19 @@ public class PooledBytesOutputStream extends OutputStream
     }
     
     @Override
+    public int getAt(int index) {
+        this._guard.enter(null);
+        
+        try {
+            return (this._support.getBlockAt(index)[
+                this._support.getWritePositionInBlockAt(index)] & 0xff);
+        }
+        finally {
+            this._guard.leave(null);
+        }
+    }
+
+    @Override
     public void close() throws IOException {
         clear();
     }
@@ -115,4 +128,5 @@ public class PooledBytesOutputStream extends OutputStream
     private volatile int _restrictionCapacity = 0;
     
     private final ConcurrentInvokeGuard _guard = new ConcurrentInvokeGuard();
+
 }
