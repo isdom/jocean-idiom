@@ -3,7 +3,7 @@
  */
 package org.jocean.idiom.block;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jocean.idiom.Pair;
@@ -93,7 +93,7 @@ public class BlocksWriteableSupport<T> {
     private int _globalWriteIndex = 0;
     
     protected final List<Ref<T>> _blocks = 
-            new LinkedList<Ref<T>>();
+            new ArrayList<Ref<T>>();
     
     private final BlockPool<T> _pool;
 }
