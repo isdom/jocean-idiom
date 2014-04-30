@@ -18,7 +18,7 @@ import org.jocean.idiom.pool.ObjectPool.Ref;
  *
  */
 public class PooledBytesOutputStream extends OutputStream 
-    implements RandomAccessBytes, AdjustableBytes {
+    implements DynamicArrayBytes {
 
     public PooledBytesOutputStream(final BytesPool pool) {
         this._support = new BlocksWriteableSupport<byte[]>(pool);
