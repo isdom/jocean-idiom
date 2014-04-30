@@ -3,6 +3,7 @@ package org.jocean.idiom.block;
 import java.io.InputStream;
 
 import org.jocean.idiom.ReferenceCounted;
+import org.jocean.idiom.pool.BytesPool;
 
 
 /**
@@ -26,6 +27,8 @@ public interface Blob extends ReferenceCounted<Blob> {
             return is;
         }
     }
+    
+    public BytesPool pool();
     
     public int length();
     

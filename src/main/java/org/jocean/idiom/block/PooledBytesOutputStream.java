@@ -48,7 +48,7 @@ public class PooledBytesOutputStream extends OutputStream
             if ( null == blocks) {
                 return null;
             }
-            final BlobImpl blob = new BlobImpl(blocks.getFirst(), blocks.getSecond());
+            final BlobImpl blob = new BlobImpl(blocks.getFirst(), blocks.getSecond(), this.pool());
             this._support.clear();
             return blob;
         }

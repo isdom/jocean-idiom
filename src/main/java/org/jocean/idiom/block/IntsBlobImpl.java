@@ -6,22 +6,29 @@ import java.util.List;
 
 import org.jocean.idiom.AbstractReferenceCounted;
 import org.jocean.idiom.ReferenceCounted;
+import org.jocean.idiom.pool.IntsPool;
 import org.jocean.idiom.pool.ObjectPool.Ref;
 
 final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob> 
     implements IntsBlob {
 
-    IntsBlobImpl(final Collection<Ref<int[]>> blocks, final int length) {
+    IntsBlobImpl(final Collection<Ref<int[]>> blocks, final int length, final IntsPool pool) {
         this._blocks = new ArrayList<Ref<int[]>>(blocks.size());
         
         ReferenceCounted.Utils.copyAllAndRetain(blocks, this._blocks);
         this._length = length;
         this._sizePerBlock = this._blocks.get(0).object().length;
+        this._pool = pool;
     }
     
     @Override
     protected void deallocate() {
         ReferenceCounted.Utils.releaseAllAndClear(this._blocks);
+    }
+    
+    @Override
+    public IntsPool pool() {
+        return this._pool;
     }
     
     @Override
@@ -62,4 +69,5 @@ final class IntsBlobImpl extends AbstractReferenceCounted<IntsBlob>
     private final List<Ref<int[]>> _blocks;
     private final int _length;
     private final int _sizePerBlock;
+    private final IntsPool _pool;
 }

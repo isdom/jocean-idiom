@@ -1,6 +1,7 @@
 package org.jocean.idiom.block;
 
 import org.jocean.idiom.ReferenceCounted;
+import org.jocean.idiom.pool.IntsPool;
 
 public interface IntsBlob extends ReferenceCounted<IntsBlob>, RandomAccessBlocks<int[]>, RandomAccessInts {
 
@@ -19,6 +20,8 @@ public interface IntsBlob extends ReferenceCounted<IntsBlob>, RandomAccessBlocks
             return ints;
         }
     }
+    
+    public IntsPool pool();
     
     public int length();
     

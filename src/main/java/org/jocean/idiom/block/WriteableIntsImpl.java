@@ -33,7 +33,7 @@ final class WriteableIntsImpl implements WriteableInts {
             if ( null == blocks) {
                 return null;
             }
-            final IntsBlobImpl blob = new IntsBlobImpl(blocks.getFirst(), blocks.getSecond());
+            final IntsBlobImpl blob = new IntsBlobImpl(blocks.getFirst(), blocks.getSecond(), this.pool());
             this._support.clear();
             return blob;
         }
