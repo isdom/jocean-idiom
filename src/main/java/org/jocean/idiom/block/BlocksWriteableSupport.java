@@ -44,15 +44,25 @@ public class BlocksWriteableSupport<T> {
         return pos % this._sizePerBlock;
     }
     
-    public int getAndIncrementWritePositionInBlock() {
+    public int getWritePositionInBlockAndIncrement() {
         final int inBlockWritePos = this._inBlockWriteIndex++;
         this._globalWriteIndex++;
+        adjustWriteIndexAndEnsureCapacity();
+        return inBlockWritePos;
+    }
+
+    private void adjustWriteIndexAndEnsureCapacity() {
         if ( this._inBlockWriteIndex >= this._sizePerBlock ) {
             ensureCapacity(this._globalWriteIndex + 1);
             this._blockIndex++;
             this._inBlockWriteIndex = 0;
         }
-        return inBlockWritePos;
+    }
+    
+    public void incrementWritePosition(final int writeSize) {
+        this._inBlockWriteIndex += writeSize;
+        this._globalWriteIndex += writeSize;
+        adjustWriteIndexAndEnsureCapacity();
     }
     
     public void clear() {
@@ -75,6 +85,10 @@ public class BlocksWriteableSupport<T> {
         return this._blocks.get( this._blockIndex ).object();
     }
 
+    public int currentWritePositionInBlock() {
+        return this._inBlockWriteIndex;
+    }
+    
     public void ensureCapacity(int capacity) {
         while ( rawCapacity() < capacity ) {
             addMoreBlock();

@@ -47,7 +47,7 @@ final class WriteableIntsImpl implements WriteableInts {
         
         try {
             final int[] currentInts = this._support.currentBlock();
-            currentInts[this._support.getAndIncrementWritePositionInBlock()] = data;
+            currentInts[this._support.getWritePositionInBlockAndIncrement()] = data;
         }
         finally {
             this._guard.leave(null);

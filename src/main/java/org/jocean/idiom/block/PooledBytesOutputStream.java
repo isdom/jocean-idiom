@@ -22,6 +22,7 @@ public class PooledBytesOutputStream extends OutputStream
 
     public PooledBytesOutputStream(final BytesPool pool) {
         this._support = new BlocksWriteableSupport<byte[]>(pool);
+        this._sizePerBlock = pool.getBlockSize();
     }
 
     public BytesPool pool() {
@@ -62,13 +63,34 @@ public class PooledBytesOutputStream extends OutputStream
         
         try {
             final byte[] currentBytes = this._support.currentBlock();
-            currentBytes[this._support.getAndIncrementWritePositionInBlock()] = (byte)b;
+            currentBytes[this._support.getWritePositionInBlockAndIncrement()] = (byte)b;
         }
         finally {
             this._guard.leave(null);
         }
     }
     
+    @Override
+    public void write(final byte[] b, int off, int len) throws IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        } else if ((off < 0) || (off > b.length) || (len < 0) ||
+                   ((off + len) > b.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+        while ( len > 0 ) {
+            final byte[] dest = this._support.currentBlock();
+            final int destPos = this._support.currentWritePositionInBlock();
+            final int writeSize = Math.min( len, this._sizePerBlock - destPos );
+            System.arraycopy(b, off, dest, destPos, writeSize);
+            this._support.incrementWritePosition(writeSize);
+            off += writeSize;
+            len -= writeSize;
+        }
+    }
+
     @Override
     public void setCapacity(final int capacity) {
         this._guard.enter(null);
@@ -124,6 +146,7 @@ public class PooledBytesOutputStream extends OutputStream
     }
     
     private final BlocksWriteableSupport<byte[]> _support;
+    private final int _sizePerBlock;
     
     private volatile int _restrictionCapacity = 0;
     
