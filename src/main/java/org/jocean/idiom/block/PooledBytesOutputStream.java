@@ -80,14 +80,22 @@ public class PooledBytesOutputStream extends OutputStream
         } else if (len == 0) {
             return;
         }
-        while ( len > 0 ) {
-            final byte[] dest = this._support.currentBlock();
-            final int destPos = this._support.currentWritePositionInBlock();
-            final int writeSize = Math.min( len, this._sizePerBlock - destPos );
-            System.arraycopy(b, off, dest, destPos, writeSize);
-            this._support.incrementWritePosition(writeSize);
-            off += writeSize;
-            len -= writeSize;
+        
+        this._guard.enter(null);
+        
+        try {
+            while ( len > 0 ) {
+                final byte[] dest = this._support.currentBlock();
+                final int destPos = this._support.currentWritePositionInBlock();
+                final int writeSize = Math.min( len, this._sizePerBlock - destPos );
+                System.arraycopy(b, off, dest, destPos, writeSize);
+                this._support.incrementWritePosition(writeSize);
+                off += writeSize;
+                len -= writeSize;
+            }
+        }
+        finally {
+            this._guard.leave(null);
         }
     }
 

@@ -101,23 +101,30 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
     	    throw new IndexOutOfBoundsException();
     	}
     	
-    	if (this._support.available() <= 0 ) {
-    	    return -1;
-    	}
-    	
-        int readed = 0;
-        while ( len > 0 && this._support.available() > 0 ) {
-            final byte[] src = this._support.currentBlock();
-            final int srcPos = this._support.currentReadPositionInBlock();
-            final int readSize = Math.min( len, this._sizePerBlock - srcPos );
-            System.arraycopy(src, srcPos, b, off, readSize);
-            this._support.incrementReadPosition(readSize);
-            off += readSize;
-            len -= readSize;
-            readed += readSize;
+        this._guard.enter(null);
+        
+        try {
+        	if (this._support.available() <= 0 ) {
+        	    return -1;
+        	}
+            
+            int readed = 0;
+            while ( len > 0 && this._support.available() > 0 ) {
+                final byte[] src = this._support.currentBlock();
+                final int srcPos = this._support.currentReadPositionInBlock();
+                final int readSize = Math.min( len, this._sizePerBlock - srcPos );
+                System.arraycopy(src, srcPos, b, off, readSize);
+                this._support.incrementReadPosition(readSize);
+                off += readSize;
+                len -= readSize;
+                readed += readSize;
+            }
+        	
+        	return readed;
         }
-    	
-    	return readed;
+        finally {
+            this._guard.leave(null);
+        }
     }
 
     /**
