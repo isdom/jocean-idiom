@@ -11,13 +11,14 @@ final class ReadableIntsImpl implements ReadableInts {
         this._support = new BlocksReadableSupport<int[]>(blocks, length);
     }
     
+    @Override
     public int read() {
         this._guard.enter(null);
         
         try {
             if ( this._support.available() > 0 ) {
                 final int[] block = this._support.currentBlock();
-                return block[this._support.getAndIncrementReadPositionInBlock()];
+                return block[this._support.getReadPositionInBlockAndIncrement()];
             }
             else {
                 throw new IllegalStateException("no more data to read.");
@@ -29,6 +30,7 @@ final class ReadableIntsImpl implements ReadableInts {
         }
     }
     
+    @Override
     public int available() {
         this._guard.enter(null);
         
@@ -40,6 +42,7 @@ final class ReadableIntsImpl implements ReadableInts {
         }
     }
     
+    @Override
     public void close() {
         this._guard.enter(null);
         

@@ -31,6 +31,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
     ReferenceCountedBytesListInputStream(
             final Collection<Ref<byte[]>> blocks, final int length) {
         this._support = new BlocksReadableSupport<byte[]>(blocks, length);
+        this._sizePerBlock = this._support.sizePerBlock();
     }
 
     /**
@@ -53,7 +54,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
         try {
             if ( this._support.available() > 0 ) {
                 final byte[] block = this._support.currentBlock();
-                return (block[this._support.getAndIncrementReadPositionInBlock()] & 0xff);
+                return (block[this._support.getReadPositionInBlockAndIncrement()] & 0xff);
             }
             else {
                 return -1;
@@ -93,26 +94,31 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
      * <code>len</code> is negative, or <code>len</code> is greater than 
      * <code>b.length - off</code>
      */
-    //	TODO, impl later
-//    public synchronized int read(byte b[], int off, int len) {
-//	if (b == null) {
-//	    throw new NullPointerException();
-//	} else if (off < 0 || len < 0 || len > b.length - off) {
-//	    throw new IndexOutOfBoundsException();
-//	}
-//	if (pos >= count) {
-//	    return -1;
-//	}
-//	if (pos + len > count) {
-//	    len = count - pos;
-//	}
-//	if (len <= 0) {
-//	    return 0;
-//	}
-//	System.arraycopy(buf, pos, b, off, len);
-//	pos += len;
-//	return len;
-//    }
+    public int read(final byte b[], int off, int len) {
+    	if (b == null) {
+    	    throw new NullPointerException();
+    	} else if (off < 0 || len < 0 || len > b.length - off) {
+    	    throw new IndexOutOfBoundsException();
+    	}
+    	
+    	if (this._support.available() <= 0 ) {
+    	    return -1;
+    	}
+    	
+        int readed = 0;
+        while ( len > 0 && this._support.available() > 0 ) {
+            final byte[] src = this._support.currentBlock();
+            final int srcPos = this._support.currentReadPositionInBlock();
+            final int readSize = Math.min( len, this._sizePerBlock - srcPos );
+            System.arraycopy(src, srcPos, b, off, readSize);
+            this._support.incrementReadPosition(readSize);
+            off += readSize;
+            len -= readSize;
+            readed += readSize;
+        }
+    	
+    	return readed;
+    }
 
     /**
      * Skips <code>n</code> bytes of input from this input stream. Fewer 
@@ -230,6 +236,7 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
     }
     
     private final BlocksReadableSupport<byte[]> _support;
+    private final int _sizePerBlock;
     private int markedPosition = 0;
     
     private final ConcurrentInvokeGuard _guard = 

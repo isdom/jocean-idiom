@@ -25,6 +25,7 @@ final class WriteableIntsImpl implements WriteableInts {
         return this._support.pool();
     }
     
+    @Override
     public IntsBlob drainToIntsBlob() {
         this._guard.enter(null);
         
@@ -42,6 +43,7 @@ final class WriteableIntsImpl implements WriteableInts {
         }
     }
     
+    @Override
     public void write(final int data) {
         this._guard.enter(null);
         
@@ -54,6 +56,7 @@ final class WriteableIntsImpl implements WriteableInts {
         }
     }
     
+    @Override
     public void close() {
         this._guard.enter(null);
         

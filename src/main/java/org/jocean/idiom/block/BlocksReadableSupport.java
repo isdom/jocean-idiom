@@ -25,14 +25,28 @@ public class BlocksReadableSupport<T> {
         this._length = length;
     }
     
-    public int getAndIncrementReadPositionInBlock() {
-        final int inBlockWritePos = this._inBlockReadIndex++;
+    public int sizePerBlock() {
+        return this._sizePerBlock;
+    }
+    
+    public int getReadPositionInBlockAndIncrement() {
+        final int inBlockReadPos = this._inBlockReadIndex++;
         this._globalReadIndex++;
+        adjustReadIndex();
+        return inBlockReadPos;
+    }
+    
+    public void incrementReadPosition(final int readSize) {
+        this._inBlockReadIndex += readSize;
+        this._globalReadIndex += readSize;
+        adjustReadIndex();
+    }
+    
+    private void adjustReadIndex() {
         if ( this._inBlockReadIndex >= this._sizePerBlock ) {
             this._blockIndex++;
             this._inBlockReadIndex = 0;
         }
-        return inBlockWritePos;
     }
     
     public void clear() {
@@ -56,6 +70,10 @@ public class BlocksReadableSupport<T> {
         return this._blocks.get( this._blockIndex ).object();
     }
 
+    public int currentReadPositionInBlock() {
+        return this._inBlockReadIndex;
+    }
+    
     public int available() {
         return this._length - this._globalReadIndex;
     }

@@ -51,18 +51,18 @@ public class BlocksWriteableSupport<T> {
         return inBlockWritePos;
     }
 
+    public void incrementWritePosition(final int writeSize) {
+        this._inBlockWriteIndex += writeSize;
+        this._globalWriteIndex += writeSize;
+        adjustWriteIndexAndEnsureCapacity();
+    }
+    
     private void adjustWriteIndexAndEnsureCapacity() {
         if ( this._inBlockWriteIndex >= this._sizePerBlock ) {
             ensureCapacity(this._globalWriteIndex + 1);
             this._blockIndex++;
             this._inBlockWriteIndex = 0;
         }
-    }
-    
-    public void incrementWritePosition(final int writeSize) {
-        this._inBlockWriteIndex += writeSize;
-        this._globalWriteIndex += writeSize;
-        adjustWriteIndexAndEnsureCapacity();
     }
     
     public void clear() {

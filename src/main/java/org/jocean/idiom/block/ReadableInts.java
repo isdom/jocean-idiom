@@ -1,10 +1,10 @@
 package org.jocean.idiom.block;
 
-public interface ReadableInts {
+import java.io.Closeable;
+
+public interface ReadableInts extends Closeable {
     
     public int available();
     
     public int read();
-    
-    public void close();
 }
