@@ -27,7 +27,7 @@ public class ExceptionUtils {
 		}
 	}
 
-	public static String dumpCallStack(final Throwable throwable, final String prefix ) {
+	public static String dumpCallStack(final Throwable throwable, final String prefix, int skipDepth) {
 	    final StringBuilder sb = new StringBuilder();
         final StackTraceElement[] callStacks = throwable.getStackTrace();
 
@@ -36,9 +36,13 @@ public class ExceptionUtils {
         }
         
         for ( StackTraceElement cs : callStacks) {
+            if ( skipDepth > 0 ) {
+                skipDepth--;
+                continue;
+            }
             sb.append('\r');
             sb.append('\n');
-            sb.append("at ");
+            sb.append("\tat ");
             sb.append(cs);
         }
         
