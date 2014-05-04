@@ -27,4 +27,21 @@ public class ExceptionUtils {
 		}
 	}
 
+	public static String dumpCallStack(final Throwable throwable, final String prefix ) {
+	    final StringBuilder sb = new StringBuilder();
+        final StackTraceElement[] callStacks = throwable.getStackTrace();
+
+        if ( null != prefix ) {
+            sb.append(prefix);
+        }
+        
+        for ( StackTraceElement cs : callStacks) {
+            sb.append('\r');
+            sb.append('\n');
+            sb.append("at ");
+            sb.append(cs);
+        }
+        
+        return sb.toString();
+	}
 }
