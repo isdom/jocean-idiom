@@ -13,7 +13,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class ExceptionUtils {
 	
-	public static String exception2detail(final Exception e) {
+	public static String exception2detail(final Throwable e) {
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		final PrintWriter writer = new PrintWriter(os);
 		e.printStackTrace(writer);
