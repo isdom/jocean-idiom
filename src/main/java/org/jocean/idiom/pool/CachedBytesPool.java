@@ -3,6 +3,9 @@
  */
 package org.jocean.idiom.pool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author isdom
  *
@@ -10,7 +13,10 @@ package org.jocean.idiom.pool;
 public class CachedBytesPool extends AbstractCachedObjectPool<byte[]> 
     implements BytesPool, CachedObjectPool<byte[]> {
 
+    private final static Logger LOG = LoggerFactory.getLogger(CachedBytesPool.class);
+
     public CachedBytesPool(final int blockSize) {
+        super(LOG);
         if ( blockSize <= 0 ) {
             throw new IllegalArgumentException("blockSize for CachedBytesPool must more than zero.");
         }

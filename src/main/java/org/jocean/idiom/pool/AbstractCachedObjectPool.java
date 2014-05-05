@@ -11,9 +11,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractCachedObjectPool<T> implements CachedObjectPool<T> {
     
-    private static final Logger LOG = 
-            LoggerFactory.getLogger(AbstractCachedObjectPool.class);
+    private final Logger LOG;
 
+    protected AbstractCachedObjectPool(final Logger logger) {
+        LOG = null != logger ? logger : LoggerFactory.getLogger(AbstractCachedObjectPool.class);
+    }
+    
     @Override
     public Ref<T> retainObject() {
         final T obj = this._caches.poll();
