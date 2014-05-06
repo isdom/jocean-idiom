@@ -8,7 +8,7 @@ package org.jocean.idiom.pool;
  * @author isdom
  *
  */
-public abstract class PoolUtils {
+public abstract class Pools {
     public static BytesPool createCachedBytesPool(final int blockSize) {
         return new CachedBytesPool(blockSize);
     }
