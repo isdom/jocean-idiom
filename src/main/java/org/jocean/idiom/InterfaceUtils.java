@@ -72,20 +72,26 @@ public class InterfaceUtils {
 	}
 	
     @SuppressWarnings("unchecked")
-    public static <T> T genAsyncImpl(final Class<T> cls, final T impl, 
-            final ExectionLoop exectionLoop) {
+    public static <T> T genAsyncImpl(
+            final Class<T> cls, final T impl, 
+            final ExectionLoop exectionLoop,
+            final ArgsHandler argsHandler) {
         return (T)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
-                new Class<?>[]{cls}, new AsyncImplHandler<T>(impl, exectionLoop));
+                new Class<?>[]{cls}, new AsyncImplHandler<T>(impl, exectionLoop, argsHandler));
     }
 
     private static final class AsyncImplHandler<T> implements InvocationHandler {
 
-        AsyncImplHandler(final T impl, final ExectionLoop exectionLoop) {
+        AsyncImplHandler(
+                final T impl, 
+                final ExectionLoop exectionLoop, 
+                final ArgsHandler argsHandler) {
             if ( null == impl || null == exectionLoop ) {
                 throw new NullPointerException("impl or exectionLoop is null.");
             }
             this._impl = impl;
             this._exectionLoop = exectionLoop;
+            this._argsHandler = argsHandler;
         }
         
         @Override
@@ -108,8 +114,14 @@ public class InterfaceUtils {
                 return  this._impl.toString();
             }
             
+            doBeforeInvoke(args);
             if ( this._exectionLoop.inExectionLoop() ) {
-                return method.invoke(this._impl, args);
+                try {
+                    return method.invoke(this._impl, args);
+                }
+                finally {
+                    doAfterInvoke(args);
+                }
             }
             else {
                 this._exectionLoop.submit(new Runnable() {
@@ -122,12 +134,40 @@ public class InterfaceUtils {
                             LOG.warn("exception when invoke method({}) for impl({}), detail:{}",
                                     method.getName(), _impl, ExceptionUtils.exception2detail(e));
                         }
+                        finally {
+                            doAfterInvoke(args);
+                        }
                     }});
                 return  null;
+            }
+        }
+
+        private void doBeforeInvoke(final Object[] args) {
+            if ( null != this._argsHandler ) {
+                try {
+                    this._argsHandler.beforeInvoke(args);
+                }
+                catch (Throwable e) {
+                    LOG.warn("exception when invoke beforeAcceptEvent for ({}), detail: {}",
+                            this._impl.toString(), ExceptionUtils.exception2detail(e));
+                }
+            }
+        }
+        
+        private void doAfterInvoke(final Object[] args) {
+            if ( null != this._argsHandler ) {
+                try {
+                    this._argsHandler.afterInvoke(args);
+                }
+                catch (Throwable e) {
+                    LOG.warn("exception when invoke afterAcceptEvent for ({}), detail: {}",
+                            this._impl.toString(), ExceptionUtils.exception2detail(e));
+                }
             }
         }
         
         private final T _impl;
         private final ExectionLoop _exectionLoop;
+        private final ArgsHandler _argsHandler;
     }
 }
