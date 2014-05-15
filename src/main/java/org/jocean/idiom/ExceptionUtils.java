@@ -6,6 +6,7 @@ package org.jocean.idiom;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author isdom
@@ -13,17 +14,20 @@ import java.io.UnsupportedEncodingException;
  */
 public class ExceptionUtils {
 	
-	public static String exception2detail(final Throwable e) {
+	public static String exception2detail(Throwable throwable) {
+	    if (throwable instanceof InvocationTargetException) {  
+	        throwable = ((InvocationTargetException)throwable).getTargetException();  
+	    }
+            
 		final ByteArrayOutputStream os = new ByteArrayOutputStream();
 		final PrintWriter writer = new PrintWriter(os);
-		e.printStackTrace(writer);
+		throwable.printStackTrace(writer);
 		writer.flush();
 		
 		try {
 			return os.toString("UTF-8");
 		} catch (UnsupportedEncodingException e1) {
-			//e1.printStackTrace();
-			return e.toString();
+			return throwable.toString();
 		}
 	}
 
