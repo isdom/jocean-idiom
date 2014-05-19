@@ -1,7 +1,7 @@
 package org.jocean.idiom;
 
 
-public interface FetchAgent<KEY, VALUE> {
+public interface FetchAgent<KEY, CTX, VALUE> {
     
     public interface FetchReactor<CTX, VALUE> {
         
@@ -9,6 +9,6 @@ public interface FetchAgent<KEY, VALUE> {
             throws Exception;
     }
     
-    public <CTX> Detachable fetchAsync(
+    public Detachable fetchAsync(
             final KEY key, final CTX ctx, final FetchReactor<CTX, VALUE> reactor);
 }
