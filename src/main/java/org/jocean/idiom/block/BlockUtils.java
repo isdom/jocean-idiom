@@ -43,6 +43,14 @@ public abstract class BlockUtils {
         return totalBytes;
     }
 
+    public static InputStream inputStream2BytesListInputStream(
+            final InputStream is, final BytesPool pool) {
+        final PooledBytesOutputStream os = new PooledBytesOutputStream(pool);
+        
+        inputStream2OutputStream(is, os);
+        return Blob.Utils.releaseAndGenInputStream(os.drainToBlob());
+    }
+    
     public static Blob file2Blob(final File file, final BytesPool pool) {
         InputStream is = null;
         PooledBytesOutputStream os = null;
