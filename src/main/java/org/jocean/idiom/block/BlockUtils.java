@@ -45,6 +45,9 @@ public abstract class BlockUtils {
 
     public static long blob2OutputStream(
             final Blob blob, final PooledBytesOutputStream os) {
+        if (null==blob) {
+            return 0;
+        }
         final InputStream is = blob.genInputStream();
         if (null!=is) {
             try {
