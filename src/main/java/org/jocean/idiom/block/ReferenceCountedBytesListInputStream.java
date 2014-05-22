@@ -112,7 +112,9 @@ final class ReferenceCountedBytesListInputStream extends InputStream {
             while ( len > 0 && this._support.available() > 0 ) {
                 final byte[] src = this._support.currentBlock();
                 final int srcPos = this._support.currentReadPositionInBlock();
-                final int readSize = Math.min( len, this._sizePerBlock - srcPos );
+                final int readSize = 
+                        Math.min(Math.min( len, this._sizePerBlock - srcPos ), 
+                            this._support.available());
                 System.arraycopy(src, srcPos, b, off, readSize);
                 this._support.incrementReadPosition(readSize);
                 off += readSize;
