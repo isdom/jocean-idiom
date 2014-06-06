@@ -18,5 +18,10 @@ public class ValidationId {
         return ++this._currentId;
     }
     
+    @Override
+    public String toString() {
+        return "ValidationId [_currentId=" + _currentId + "]";
+    }
+
     private int _currentId = 0;
 }
