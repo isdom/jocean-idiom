@@ -12,3 +12,6 @@ jocean's 通用基础库，适用于 Android & J2SE.
   6、inputStream2BytesListInputStream：将通用InputStream内容读取到BytesList作为后端存储的InputStream(该InputStream 支持 mark &
   reset操作)
   7、添加BlockUtils.blob2OutputStream 方法
+
+2014-06-11:  release 0.1.0 版本
+  1、增加ValidationId，用于event-api based 业务逻辑(flow)实现中的有效实例验证
