@@ -23,7 +23,7 @@
        module="${module.name}" 
        revision="${module.version}" 
        status="release" 
-       publication="20101111120000">
+       publication="20140611165000">
         <description homepage="http://www.jocean.org">
           jocean : idiom
         </description>
