@@ -1,5 +1,6 @@
 package org.jocean.idiom.block;
 
+import java.io.DataOutput;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,6 +66,59 @@ public abstract class BlockUtils {
         }
     }
     
+    public static long blob2DataOutput(
+            final Blob blob, 
+            final DataOutput output, 
+            final BytesPool pool) {
+        if (null==blob) {
+            return 0;
+        }
+        final InputStream is = blob.genInputStream();
+        if (null!=is) {
+            try {
+                return inputStream2DataOutput(is, output, pool);
+            }
+            finally {
+                try {
+                    is.close();
+                } catch (Throwable e) {
+                }
+            }
+        }
+        else {
+            return 0;
+        }
+    }
+    
+    public static long inputStream2DataOutput(
+            final InputStream is,
+            final DataOutput output, 
+            final BytesPool pool) {
+        long totalBytes = 0;
+        final Ref<byte[]> bytes = pool.retainObject();
+        try {
+            while ( is.available() > 0 ) {
+                final int actualSize = is.read(bytes.object());
+                if ( actualSize == -1 ) {
+                    break;
+                }
+                output.write(bytes.object(), 0, actualSize);
+                totalBytes += actualSize;
+                if ( LOG.isTraceEnabled() ) {
+                    LOG.trace("read bytebuf's content to bytesList, size {}", actualSize);
+                }
+            }
+        }
+        catch(Throwable e) {
+            LOG.warn("exception when inputStream -> OutputStream, detail: {}", 
+                    ExceptionUtils.exception2detail(e) );
+        }
+        finally {
+            bytes.release();
+        }
+        return totalBytes;
+    }
+
     public static InputStream inputStream2BytesListInputStream(
             final InputStream is, final BytesPool pool) {
         final PooledBytesOutputStream os = new PooledBytesOutputStream(pool);
