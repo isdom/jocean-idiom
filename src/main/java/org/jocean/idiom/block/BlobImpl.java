@@ -3,6 +3,7 @@
  */
 package org.jocean.idiom.block;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +50,11 @@ final class BlobImpl extends AbstractReferenceCounted<Blob> implements Blob {
     @Override
     protected void deallocate() {
         ReferenceCounted.Utils.releaseAllAndClear(this._blocks);
+    }
+    
+    @Override
+    public void close() throws IOException {
+        this.release();
     }
     
     private final List<Ref<byte[]>> _blocks;
