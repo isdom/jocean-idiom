@@ -15,8 +15,7 @@ public interface ArgsHandler {
 	public void afterInvoke(final Object[] args) throws Exception;
 
 	final class Consts {
-        public static final ArgsHandler _REFCOUNTED_ARGS_GUARD = new ArgsHandler() {
-    
+	    public static class RefcountedArgsGuard implements ArgsHandler {
             @Override
             public Object[] beforeInvoke(final Object[] args) {
                 if ( null != args ) {
@@ -38,6 +37,9 @@ public interface ArgsHandler {
                         }
                     }
                 }
-            }};
+            }	        
+	    }
+	    
+        public static final ArgsHandler _REFCOUNTED_ARGS_GUARD = new RefcountedArgsGuard();
 	}
 }
