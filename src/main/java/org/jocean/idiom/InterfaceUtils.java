@@ -22,7 +22,11 @@ public class InterfaceUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
-		return (T)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = cls.getClassLoader();
+        }
+        return (T) Proxy.newProxyInstance(cl,
 				new Class<?>[]{cls}, new CompositeImplHandler<T>(impls));
 	}
 
@@ -76,7 +80,11 @@ public class InterfaceUtils {
             final Class<T> cls, final T impl, 
             final ExectionLoop exectionLoop,
             final ArgsHandler argsHandler) {
-        return (T)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = cls.getClassLoader();
+        }
+        return (T) Proxy.newProxyInstance(cl,
                 new Class<?>[]{cls}, new AsyncImplHandler<T>(impl, exectionLoop, argsHandler));
     }
 
