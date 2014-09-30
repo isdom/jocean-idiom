@@ -3,6 +3,9 @@ jocean-idiom
 
 jocean's 通用基础库，适用于 Android & J2SE.
 
+2014-09-30:  release 0.1.2 版本
+  1、在InterfaceUtils.combineImpls 和 InterfaceUtils.genAsyncImpl 实现中，处理 Thread.currentThread().getContextClassLoader() 返回为 null 的情况，直接使用 cls.getClassLoader()。
+
 2014-08-19:  release 0.1.1 版本
   1、实现 RefcountedArgsGuard 工具支持类，用于 ReferenceCounted 实例用于异步传递时的retain/release 保护
   2、新增 Md5 工具类，获取 特定字符串的md5计算结果，并转换为固定32个字符长度的String
