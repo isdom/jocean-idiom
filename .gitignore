@@ -1,1 +1,3 @@
 /bin
+.gradle
+.DS_Store
