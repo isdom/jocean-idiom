@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=jocean-idiom&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
