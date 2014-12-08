@@ -1,4 +1,4 @@
-apply from: 'http://hbdev.widget-inc.com:8080/devconf/build-lib.gradle'
+apply from: 'http://dev.jocean.org:8080/devconf/build-lib.gradle'
 
 configurations {
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
