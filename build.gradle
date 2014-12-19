@@ -1,4 +1,4 @@
-apply from: 'http://112.126.72.60:8080/devconf/build-lib.gradle'
+apply from: 'http://dev.jocean.org:8080/devconf/build-lib.gradle'
 
 configurations {
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
