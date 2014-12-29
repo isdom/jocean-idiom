@@ -3,6 +3,8 @@
  */
 package org.jocean.idiom;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -38,6 +40,12 @@ public class SimpleCache<K, V> {
         else {
             return  value;
         }
+    }
+    
+    public Map<K, V> snapshot() {
+        final Map<K, V> result = new HashMap<K, V>();
+        result.putAll(this._map);
+        return result;
     }
     
     private final ConcurrentMap<K, V>  _map = 
