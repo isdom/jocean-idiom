@@ -60,6 +60,10 @@ public class SimpleCache<K, V> {
         }
     }
     
+    public void clear() {
+        this._map.clear();
+    }
+    
     public Map<K, V> snapshot() {
         final Map<K, V> result = new HashMap<K, V>();
         result.putAll(this._map);
