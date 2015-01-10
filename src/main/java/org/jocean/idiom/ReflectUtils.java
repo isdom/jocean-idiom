@@ -28,6 +28,7 @@ public class ReflectUtils {
     public static <T extends Enum<T>> T[] getValuesOf(final Class<T> cls) {
         try {
             final Method valuesMethod = cls.getDeclaredMethod("values");
+            valuesMethod.setAccessible(true);
             final T[] values = (T[])valuesMethod.invoke(null);
             return values;
         } catch (Exception e) {
