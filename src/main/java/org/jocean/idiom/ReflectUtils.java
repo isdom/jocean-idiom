@@ -4,6 +4,7 @@
 package org.jocean.idiom;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -23,7 +24,20 @@ public class ReflectUtils {
 	
     private static final Logger LOG = LoggerFactory.getLogger(ReflectUtils.class);
     
-    static public Class<?> getComponentClass(final Field field) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> T[] getValuesOf(final Class<T> cls) {
+        try {
+            final Method valuesMethod = cls.getDeclaredMethod("values");
+            final T[] values = (T[])valuesMethod.invoke(null);
+            return values;
+        } catch (Exception e) {
+            LOG.error("exception when invoke enum({})'s static method values, detail:{}",
+                    cls, ExceptionUtils.exception2detail(e));
+            return (T[]) Array.newInstance(cls, 0);
+        }
+    }
+    
+    public static Class<?> getComponentClass(final Field field) {
         if ( null == field ) {
             String errmsg = "ReflectUtils: field is null, can't get compoment class.";
             LOG.error(errmsg);
@@ -42,7 +56,7 @@ public class ReflectUtils {
         return  clazz;
     }
     
-    static public Field[] getAllFieldsOfClass(final Class<?> cls) {
+    public static Field[] getAllFieldsOfClass(final Class<?> cls) {
         Field[] fields = new Field[0];
         
         Class<?> itr = cls;
@@ -54,7 +68,7 @@ public class ReflectUtils {
         return	fields;
     }
     
-	static public Field[]	getAnnotationFieldsOf(
+    public static Field[] getAnnotationFieldsOf(
 	        final Class<?> cls, 
 			final Class<? extends Annotation> annotationClass) {
         final List<Field> fs = new ArrayList<Field>();
@@ -73,7 +87,7 @@ public class ReflectUtils {
         return  fs.toArray(new Field[0]);
 	}
 	
-    static public Method[]   getAnnotationMethodsOf(
+	public static Method[]   getAnnotationMethodsOf(
             final Class<?> cls, 
             final Class<? extends Annotation> annotationClass) {
         final List<Method> ms = new ArrayList<Method>();
