@@ -44,6 +44,11 @@ public class Tuple implements Serializable {
         return (idx >=0 && idx < this._objs.length) ? (T)this._objs[idx] : null;
     }
     
+    public <T> boolean instanceOf(final int idx, Class<T> cls) {
+        final Object obj = getAt(idx);
+        return null != obj ? cls.isAssignableFrom(obj.getClass()) : false;
+    }
+    
     public int size() {
         return this._objs.length;
     }
