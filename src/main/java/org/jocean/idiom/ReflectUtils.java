@@ -25,6 +25,28 @@ public class ReflectUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ReflectUtils.class);
     
     @SuppressWarnings("unchecked")
+    public static <T> T getStaticFieldValue(final String fullFieldName) {
+        try {
+            final int idx = fullFieldName.lastIndexOf('.');
+            final String clsName = fullFieldName.substring(0, idx);
+            final String fieldName = fullFieldName.substring(idx+1);
+            final Class<?> cls = Class.forName(clsName);
+            if ( null != cls ) {
+                final Field field = cls.getDeclaredField(fieldName);
+                if (null != field) {
+                    field.setAccessible(true);
+                    return (T)field.get(null);
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("exception when getStaticFieldValue for ({}), detail:{}", 
+                    fullFieldName, ExceptionUtils.exception2detail(e) );
+            throw new RuntimeException(e);
+        }
+        return null;
+    }    
+    
+    @SuppressWarnings("unchecked")
     public static <T extends Enum<T>> T[] getValuesOf(final Class<T> cls) {
         try {
             final Method valuesMethod = cls.getDeclaredMethod("values");
