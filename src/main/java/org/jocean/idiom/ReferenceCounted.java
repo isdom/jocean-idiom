@@ -47,6 +47,27 @@ public interface ReferenceCounted<T extends ReferenceCounted<?>> {
                 to.add(ref.retain());
             }
         }
+        
+        public static PairedVisitor<Object> _REFCOUNTED_GUARD = new PairedVisitor<Object>() {
+
+            @Override
+            public void visitBegin(final Object obj) {
+                if ( obj instanceof ReferenceCounted ) {
+                    ((ReferenceCounted<?>)obj).retain();
+                }
+            }
+
+            @Override
+            public void visitEnd(final Object obj) {
+                if ( obj instanceof ReferenceCounted ) {
+                    ((ReferenceCounted<?>)obj).release();
+                }
+            }
+            
+            @Override
+            public String toString() {
+                return "ReferenceCounted.Utils._REFCOUNTED_GUARD";
+            }};
     }
     
     /**
