@@ -39,6 +39,13 @@ public class Tuple implements Serializable {
         this._objs = objs;
     }
     
+    public Tuple append(final Object ...objs) {
+        final Object[] newObjs = new Object[this._objs.length + objs.length];
+        System.arraycopy(this._objs, 0, newObjs, 0, this._objs.length);
+        System.arraycopy(objs, 0, newObjs, this._objs.length, objs.length);
+        return new Tuple(newObjs);
+    }
+    
     @SuppressWarnings("unchecked")
     public <T> T getAt(final int idx) {
         return (idx >=0 && idx < this._objs.length) ? (T)this._objs[idx] : null;
