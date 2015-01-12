@@ -10,6 +10,7 @@ package org.jocean.idiom;
  */
 public class ValidationId {
 
+    //  TODO: imporved for multi-thread using AtomicInteger
     public boolean isValidId(final int id) {
         return (id == this._currentId);
     }
