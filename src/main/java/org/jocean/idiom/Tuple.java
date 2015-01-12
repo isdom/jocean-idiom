@@ -40,15 +40,20 @@ public class Tuple implements Serializable {
     }
     
     public Tuple append(final Object ...objs) {
-        final Object[] newObjs = new Object[this._objs.length + objs.length];
-        System.arraycopy(this._objs, 0, newObjs, 0, this._objs.length);
-        System.arraycopy(objs, 0, newObjs, this._objs.length, objs.length);
+        if ( null == objs || objs.length == 0) {
+            return this;
+        }
+        final Object[] newObjs = new Object[size() + objs.length];
+        if ( size() > 0 ) {
+            System.arraycopy(this._objs, 0, newObjs, 0, size());
+        }
+        System.arraycopy(objs, 0, newObjs, size(), objs.length);
         return new Tuple(newObjs);
     }
     
     @SuppressWarnings("unchecked")
     public <T> T getAt(final int idx) {
-        return (idx >=0 && idx < this._objs.length) ? (T)this._objs[idx] : null;
+        return (idx >=0 && idx < size()) ? (T)this._objs[idx] : null;
     }
     
     public <T> boolean instanceOf(final int idx, Class<T> cls) {
@@ -57,7 +62,7 @@ public class Tuple implements Serializable {
     }
     
     public int size() {
-        return this._objs.length;
+        return null != this._objs ? this._objs.length : 0;
     }
     
     private final Object[] _objs;
