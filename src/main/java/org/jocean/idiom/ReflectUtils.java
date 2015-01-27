@@ -22,7 +22,21 @@ import org.slf4j.LoggerFactory;
  */
 public class ReflectUtils {
 	
-    private static final Logger LOG = LoggerFactory.getLogger(ReflectUtils.class);
+    private static final Logger LOG = 
+            LoggerFactory.getLogger(ReflectUtils.class);
+    
+    @SuppressWarnings("unchecked")
+    public static <T> T getOuterFromInnerObject(final Object inner) {
+        try {
+            final Field field = inner.getClass().getDeclaredField("this$0");
+            field.setAccessible(true);
+            return (T)field.get(inner);
+        } catch (Exception e) {
+            LOG.warn("exception when getOuterFromInnerObject for inner {}, detail: {}",
+                    inner, ExceptionUtils.exception2detail(e));
+            return null;
+        }
+    }
     
     @SuppressWarnings("unchecked")
     public static <T> T getStaticFieldValue(final String fullFieldName) {
