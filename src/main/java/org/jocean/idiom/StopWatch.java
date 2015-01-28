@@ -12,6 +12,10 @@ public class StopWatch {
         return this._begin = System.currentTimeMillis();
     }
     
+    public long pauseAndContinue() {
+        return System.currentTimeMillis() - this._begin;
+    }
+    
     public long stopAndRestart() {
         final long now = System.currentTimeMillis();
         final long interval = now - this._begin;
