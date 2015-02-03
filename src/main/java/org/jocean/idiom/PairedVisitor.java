@@ -12,6 +12,7 @@ public interface PairedVisitor<T> {
         private static final Logger LOG = 
                 LoggerFactory.getLogger(Utils.class);
         
+        @SafeVarargs
         public static <T> PairedVisitor<T> composite(final PairedVisitor<T> ...paireds) {
             return new PairedVisitor<T>() {
 

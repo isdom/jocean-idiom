@@ -32,7 +32,8 @@ public class InterfaceUtils {
 
 	private static final class CompositeImplHandler<T> implements InvocationHandler {
 
-		CompositeImplHandler(final T ... impls) {
+		@SafeVarargs
+        CompositeImplHandler(final T ... impls) {
 			if ( null == impls || 0 == impls.length ) {
 				throw new NullPointerException("impl can't be neither null nor empty array");
 			}

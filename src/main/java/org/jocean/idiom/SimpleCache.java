@@ -65,13 +65,13 @@ public class SimpleCache<K, V> {
     }
     
     public Map<K, V> snapshot() {
-        final Map<K, V> result = new HashMap<K, V>();
+        final Map<K, V> result = new HashMap<>();
         result.putAll(this._map);
         return result;
     }
     
     private final ConcurrentMap<K, V>  _map = 
-            new ConcurrentHashMap<K, V>();
+            new ConcurrentHashMap<>();
     private final Function<K, V> _ifAbsent;
     private final Visitor2<K,V> _ifAssociated;
 }
