@@ -19,6 +19,11 @@ public class COWCompositeSupport<T> {
     private static final Logger LOG = 
         	LoggerFactory.getLogger(COWCompositeSupport.class);
     
+    public boolean isEmpty() {
+    	final List<T> current = this._components.get();
+    	return (null == current) || current.isEmpty();
+    }
+    
 	public boolean addComponent(final T component) {
 		synchronized( this._components) {
 			final List<T> current = _components.get();
@@ -77,5 +82,5 @@ public class COWCompositeSupport<T> {
 	}
 	
     private final AtomicReference<List<T>> 
-		_components = new AtomicReference<List<T>>(null);
+		_components = new AtomicReference<>(null);
 }
