@@ -28,9 +28,32 @@ public class ReflectUtils {
     @SuppressWarnings("unchecked")
     public static <T> T getOuterFromInnerObject(final Object inner) {
         try {
-            final Field field = inner.getClass().getDeclaredField("this$0");
-            field.setAccessible(true);
-            return (T)field.get(inner);
+        	final Field[] fields = inner.getClass().getDeclaredFields();
+        	for (Field field : fields) {
+        		//	"this$0" "this$1" "this$2" ...
+        		//	http://nrg19840409.iteye.com/blog/1216036
+        		/*
+        		this$0就是内部类所自动保留的一个指向所在外部类的引用。 
+        		另外,受到$后的数字0启发,发现原来数字还可以有1,2,3..., 具体可以看如下代码就一清二楚了. 
+        		//Outer.java 
+        		public class Outer {//this$0 
+        		public class FirstInner {//this$1 
+        		  public class SecondInner {//this$2 
+        		   public class ThirdInner { 
+        		   } 
+        		  } 
+        		}
+        		*/
+        		//	so search for field named this$x
+        		if (field.getName().startsWith("this$")) {
+                    field.setAccessible(true);
+                    return (T)field.get(inner);
+        		}
+        	}
+        	return null;
+//            final Field field = inner.getClass().getDeclaredField("this$0");
+//            field.setAccessible(true);
+//            return (T)field.get(inner);
         } catch (Exception e) {
             LOG.warn("exception when getOuterFromInnerObject for inner {}, detail: {}",
                     inner, ExceptionUtils.exception2detail(e));
