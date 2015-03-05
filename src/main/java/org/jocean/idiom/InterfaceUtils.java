@@ -23,6 +23,13 @@ public class InterfaceUtils {
 	private static final Logger LOG = 
         	LoggerFactory.getLogger(InterfaceUtils.class);
 	
+    public static <T> T compositeByType(final Object[] objs, final Class<T> cls) {
+    	final T[] impls = filterByType(objs, cls);
+    	return (null != impls) 
+    		? combineImpls(cls, impls)
+    		: null;
+    }
+    
 	@SuppressWarnings("unchecked")
 	public static <T> T[] filterByType(final Object[] objs, final Class<T> cls) {
 		final List<T> objsOfT = new ArrayList<T>() {
