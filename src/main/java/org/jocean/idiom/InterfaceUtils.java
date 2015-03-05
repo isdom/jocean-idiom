@@ -3,10 +3,13 @@
  */
 package org.jocean.idiom;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,20 @@ public class InterfaceUtils {
 	
 	private static final Logger LOG = 
         	LoggerFactory.getLogger(InterfaceUtils.class);
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T[] filterByType(final Object[] objs, final Class<T> cls) {
+		final List<T> objsOfT = new ArrayList<T>() {
+			private static final long serialVersionUID = 1L;
+		{
+			for (Object obj : objs) {
+				if (null != obj && cls.isAssignableFrom(obj.getClass())) {
+					this.add((T)obj);
+				}
+			}
+		}};
+		return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
