@@ -2,8 +2,8 @@ package org.jocean.idiom.rx;
 
 import rx.functions.FuncN;
 
-public class FunctionsEx {
-    private FunctionsEx() {
+public class RxFunctions {
+    private RxFunctions() {
         throw new IllegalStateException("No instances!");
     }
 
