@@ -1,5 +1,5 @@
 package org.jocean.idiom;
 
 public interface Ordered {
-    public int getOrder();
+    public int ordinal();
 }
