@@ -30,13 +30,6 @@ public class InterfaceUtils {
     		: null;
     }
     
-    public static <T> T compositeExcludeType(final Object[] objs, final Class<T> cls) {
-        final T[] impls = selectExcludeType(objs, cls);
-        return (null != impls) 
-            ? combineImpls(cls, impls)
-            : null;
-    }
-    
 	@SuppressWarnings("unchecked")
 	public static <T> T[] selectIncludeType(final Object[] objs, final Class<T> cls) {
 		final List<T> objsOfT = new ArrayList<T>() {
@@ -51,18 +44,17 @@ public class InterfaceUtils {
 		return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
 	}
 	
-    @SuppressWarnings("unchecked")
-    public static <T> T[] selectExcludeType(final Object[] objs, final Class<T> cls) {
-        final List<T> objsOfT = new ArrayList<T>() {
+    public static <T> Object[] selectExcludeType(final Object[] objs, final Class<T> cls) {
+        final List<Object> objsOfT = new ArrayList<Object>() {
             private static final long serialVersionUID = 1L;
         {
             for (Object obj : objs) {
                 if (null != obj && !cls.isAssignableFrom(obj.getClass())) {
-                    this.add((T)obj);
+                    this.add(obj);
                 }
             }
         }};
-        return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
+        return !objsOfT.isEmpty() ? objsOfT.toArray() : null;
     }
     
 	@SuppressWarnings("unchecked")
