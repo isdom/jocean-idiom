@@ -23,11 +23,18 @@ public class InterfaceUtils {
 	private static final Logger LOG = 
         	LoggerFactory.getLogger(InterfaceUtils.class);
 	
-    public static <T> T compositeByType(final Object[] objs, final Class<T> cls) {
+    public static <T> T compositeIncludeType(final Object[] objs, final Class<T> cls) {
     	final T[] impls = selectIncludeType(objs, cls);
     	return (null != impls) 
     		? combineImpls(cls, impls)
     		: null;
+    }
+    
+    public static <T> T compositeExcludeType(final Object[] objs, final Class<T> cls) {
+        final T[] impls = selectExcludeType(objs, cls);
+        return (null != impls) 
+            ? combineImpls(cls, impls)
+            : null;
     }
     
 	@SuppressWarnings("unchecked")
