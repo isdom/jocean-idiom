@@ -24,14 +24,14 @@ public class InterfaceUtils {
         	LoggerFactory.getLogger(InterfaceUtils.class);
 	
     public static <T> T compositeByType(final Object[] objs, final Class<T> cls) {
-    	final T[] impls = filterByType(objs, cls);
+    	final T[] impls = selectIncludeType(objs, cls);
     	return (null != impls) 
     		? combineImpls(cls, impls)
     		: null;
     }
     
 	@SuppressWarnings("unchecked")
-	public static <T> T[] filterByType(final Object[] objs, final Class<T> cls) {
+	public static <T> T[] selectIncludeType(final Object[] objs, final Class<T> cls) {
 		final List<T> objsOfT = new ArrayList<T>() {
 			private static final long serialVersionUID = 1L;
 		{
@@ -44,6 +44,20 @@ public class InterfaceUtils {
 		return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
 	}
 	
+    @SuppressWarnings("unchecked")
+    public static <T> T[] selectExcludeType(final Object[] objs, final Class<T> cls) {
+        final List<T> objsOfT = new ArrayList<T>() {
+            private static final long serialVersionUID = 1L;
+        {
+            for (Object obj : objs) {
+                if (null != obj && !cls.isAssignableFrom(obj.getClass())) {
+                    this.add((T)obj);
+                }
+            }
+        }};
+        return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
+    }
+    
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
