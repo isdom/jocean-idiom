@@ -30,6 +30,14 @@ public class InterfaceUtils {
     		: null;
     }
     
+    @SuppressWarnings("unchecked")
+    public static <T,EX> T compositeExcludeType(final Object[] objs, final Class<T> cls, final Class<EX> exCls) {
+        final Object[] impls = selectExcludeType(objs, exCls);
+        return (null != impls) 
+                ? combineImpls(cls, Arrays.asList(impls).toArray((T[])Array.newInstance(cls, 0)))
+                : null;
+    }
+    
 	@SuppressWarnings("unchecked")
 	public static <T> T[] selectIncludeType(final Object[] objs, final Class<T> cls) {
 		final List<T> objsOfT = new ArrayList<T>() {
