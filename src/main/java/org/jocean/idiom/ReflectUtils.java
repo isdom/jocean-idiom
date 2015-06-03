@@ -26,6 +26,17 @@ public class ReflectUtils {
             LoggerFactory.getLogger(ReflectUtils.class);
     
     @SuppressWarnings("unchecked")
+    public static <T> T invokeClone(final T cloneable) {
+        try {
+            final Method cloneMethod = cloneable.getClass().getDeclaredMethod("clone");
+            cloneMethod.setAccessible(true);
+            return (T)cloneMethod.invoke(cloneable);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
     public static <T> T getOuterFromInnerObject(final Object inner) {
         try {
         	final Field[] fields = inner.getClass().getDeclaredFields();
