@@ -14,6 +14,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.functions.Func1;
+
 /**
  * @author isdom
  *
@@ -23,23 +25,40 @@ public class InterfaceUtils {
 	private static final Logger LOG = 
         	LoggerFactory.getLogger(InterfaceUtils.class);
 	
-    public static <T> T compositeIncludeType(final Object[] objs, final Class<T> cls) {
-    	final T[] impls = selectIncludeType(objs, cls);
+    @SuppressWarnings("unchecked")
+    public static <SRC,T> T compositeBySource(
+            final Class<T>          intfType,
+            final Func1<SRC,T>      src2intf, 
+            final SRC...            sources) {
+        final List<T> intfs = new ArrayList<>();
+        for (SRC src : sources) {
+            final T intf = src2intf.call(src);
+            if (null!=intf) {
+                intfs.add(intf);
+            }
+        }
+        return !intfs.isEmpty() 
+                ? combineImpls(intfType, intfs.toArray((T[])Array.newInstance(intfType, 0))) 
+                : null;
+    }
+    
+    public static <T> T compositeIncludeType(final Class<T> cls, final Object... objs) {
+    	final T[] impls = selectIncludeType(cls, objs);
     	return (null != impls) 
     		? combineImpls(cls, impls)
     		: null;
     }
     
     @SuppressWarnings("unchecked")
-    public static <T,EX> T compositeExcludeType(final Object[] objs, final Class<T> cls, final Class<EX> exCls) {
-        final Object[] impls = selectExcludeType(objs, exCls);
+    public static <T,EX> T compositeExcludeType(final Class<T> cls, final Class<EX> exCls, final Object... objs) {
+        final Object[] impls = selectExcludeType(exCls, objs);
         return (null != impls) 
                 ? combineImpls(cls, Arrays.asList(impls).toArray((T[])Array.newInstance(cls, 0)))
                 : null;
     }
     
 	@SuppressWarnings("unchecked")
-	public static <T> T[] selectIncludeType(final Object[] objs, final Class<T> cls) {
+	public static <T> T[] selectIncludeType(final Class<T> cls, final Object... objs) {
 		final List<T> objsOfT = new ArrayList<T>() {
 			private static final long serialVersionUID = 1L;
 		{
@@ -52,7 +71,7 @@ public class InterfaceUtils {
 		return !objsOfT.isEmpty() ? objsOfT.toArray((T[])Array.newInstance(cls, 0)) : null;
 	}
 	
-    public static <T> Object[] selectExcludeType(final Object[] objs, final Class<T> cls) {
+    public static <T> Object[] selectExcludeType(final Class<T> cls, final Object... objs) {
         final List<Object> objsOfT = new ArrayList<Object>() {
             private static final long serialVersionUID = 1L;
         {

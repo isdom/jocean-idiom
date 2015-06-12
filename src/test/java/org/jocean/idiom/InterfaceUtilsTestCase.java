@@ -14,7 +14,7 @@ public class InterfaceUtilsTestCase {
 	public void testFilterByType() {
 		
 		final Object[] objs = new Object[]{new Object(), new Intf1() {}, new Object()};
-		final Intf1[] filtered = InterfaceUtils.selectIncludeType(objs, Intf1.class);
+		final Intf1[] filtered = InterfaceUtils.selectIncludeType(Intf1.class, objs);
 		
 		assertEquals(1, filtered.length);
 	}
@@ -23,7 +23,7 @@ public class InterfaceUtilsTestCase {
 	public void testFilterByTypeRetNull() {
 		
 		final Object[] objs = new Object[]{new Object(), new Object(), new Object()};
-		final Intf1[] filtered = InterfaceUtils.selectIncludeType(objs, Intf1.class);
+		final Intf1[] filtered = InterfaceUtils.selectIncludeType(Intf1.class, objs);
 		
 		assertNull(filtered);
 	}
