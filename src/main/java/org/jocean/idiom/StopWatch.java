@@ -23,5 +23,5 @@ public class StopWatch {
         return interval;
     }
     
-    private long _begin;
+    private long _begin = System.currentTimeMillis();
 }
