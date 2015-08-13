@@ -4,6 +4,7 @@ import rx.Observable;
 import rx.Observable.Operator;
 import rx.Observable.Transformer;
 import rx.Subscriber;
+import rx.functions.Func0;
 
 public class RxObservables {
     private RxObservables() {
@@ -42,5 +43,14 @@ public class RxObservables {
     @SuppressWarnings("unchecked")
     public static final <T> Transformer<T, T> ignoreCompleted() {
         return (Transformer<T, T>)IGNORE_COMPLETED_TRANSFORMER;
+    }
+    
+    public static final <T, U> Observable<T> delaySubscriptionUntilCompleted(
+            final Observable<T> source, final Observable<U> selector) {
+        return source.delaySubscription(new Func0<Observable<U>>() {
+            @Override
+            public Observable<U> call() {
+                return selector.last();
+            }});
     }
 }
