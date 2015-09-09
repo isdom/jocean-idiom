@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import rx.functions.Func1;
+import rx.internal.util.PlatformDependent;
 
 /**
  * @author isdom
@@ -86,17 +87,26 @@ public class InterfaceUtils {
     
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            cl = cls.getClassLoader();
-            LOG.debug("combineImpls: usingcls.getClassLoader: {}", cl);
-        } else {
-            LOG.debug("combineImpls: using Thread.getContextClassLoader: {}", cl);
-        }
+        final ClassLoader cl = getClassLoader(cls);
+        LOG.debug("combineImpls: using ClassLoader: {}", cl);
+        
         return (T) Proxy.newProxyInstance(cl,
 				new Class<?>[]{cls}, new CompositeImplHandler<T>(impls));
 	}
 
+	private static ClassLoader getClassLoader(final Class<?> cls) {
+	    if (PlatformDependent.isAndroid()) {
+	        return cls.getClassLoader();
+	    } else {
+	        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+	        if (cl == null) {
+	            return cls.getClassLoader();
+	        } else {
+	            return cl;
+	        }
+	    }
+	}
+	
 	private static final class CompositeImplHandler<T> implements InvocationHandler {
 
 		@SafeVarargs
