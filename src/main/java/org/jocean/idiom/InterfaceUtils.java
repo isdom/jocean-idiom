@@ -89,6 +89,9 @@ public class InterfaceUtils {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {
             cl = cls.getClassLoader();
+            LOG.debug("combineImpls: usingcls.getClassLoader: {}", cl);
+        } else {
+            LOG.debug("combineImpls: using Thread.getContextClassLoader: {}", cl);
         }
         return (T) Proxy.newProxyInstance(cl,
 				new Class<?>[]{cls}, new CompositeImplHandler<T>(impls));
