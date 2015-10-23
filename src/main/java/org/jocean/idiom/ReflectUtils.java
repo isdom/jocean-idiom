@@ -197,4 +197,18 @@ public class ReflectUtils {
 	    System.arraycopy(second, 0, result, first.length, second.length);
 	    return result;
 	}
+
+    public static Method getMethodOf(final Class<?> cls, final String methodName, final Class<?> ...parameterTypes) {
+        try {
+            final Method method = cls.getDeclaredMethod(methodName, parameterTypes);
+            if (null!=method) {
+                method.setAccessible(true);
+            }
+            return method;
+        } catch (Exception e) {
+            LOG.warn("exception when getDeclaredMethod for {}/{}, detail:{}",
+                    cls, methodName, ExceptionUtils.exception2detail(e));
+            return null;
+        }
+    }
 }
