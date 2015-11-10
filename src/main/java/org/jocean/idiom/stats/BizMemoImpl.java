@@ -5,8 +5,9 @@ package org.jocean.idiom.stats;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jocean.idiom.Function;
 import org.jocean.idiom.ReflectUtils;
+
+import rx.functions.Func1;
 
 /**
  * @author isdom
@@ -76,7 +77,7 @@ public abstract class BizMemoImpl<IMPL extends BizMemoImpl<IMPL,STEP,RESULT>,
     }
     
     @SuppressWarnings("unchecked")
-    public IMPL fillTimeIntervalMemoWith(final Function<Enum<?>, TimeIntervalMemo> enum2memo) {
+    public IMPL fillTimeIntervalMemoWith(final Func1<Enum<?>, TimeIntervalMemo> enum2memo) {
         fillTTLMemosWith(this._steps, this._stepMemos, enum2memo);
         fillTTLMemosWith(this._results, this._resultMemos, enum2memo);
         return (IMPL)this;
@@ -88,9 +89,9 @@ public abstract class BizMemoImpl<IMPL extends BizMemoImpl<IMPL,STEP,RESULT>,
     private static <E extends Enum<E>> void fillTTLMemosWith(
             final E[] enums,
             final TimeIntervalMemo[] memos,
-            final Function<Enum<?>, TimeIntervalMemo> enum2memo) {
+            final Func1<Enum<?>, TimeIntervalMemo> enum2memo) {
         for ( E e : enums ) {
-            final TimeIntervalMemo memo = enum2memo.apply(e);
+            final TimeIntervalMemo memo = enum2memo.call(e);
             if (null != memo) {
                 memos[e.ordinal()] = memo;
             }
