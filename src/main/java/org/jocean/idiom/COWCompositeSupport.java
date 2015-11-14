@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.functions.Action1;
+
 /**
  * @author isdom
  *
@@ -56,13 +58,13 @@ public class COWCompositeSupport<T> {
 		}
 	}
 
-	public void foreachComponent(final Visitor<T> visitor) {
+	public void foreachComponent(final Action1<T> visitor) {
     	final List<T> current = this._components.get();
     	if ( null != current ) {
     		for ( int idx = 0; idx < current.size(); idx++) {
     			final T component = current.get(idx);
     			try {
-    				visitor.visit( component );
+    				visitor.call( component );
     			}
     			catch (Exception e) {
     				LOG.error("exception when call COWCompositeSupport.foreachComponent, detail:{}",

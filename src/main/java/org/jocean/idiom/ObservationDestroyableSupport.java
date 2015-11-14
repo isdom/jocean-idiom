@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.functions.Action1;
+
 /**
  * @author isdom
  *
@@ -28,11 +30,16 @@ public class ObservationDestroyableSupport implements ObservationDestroyable {
     @Override
     public boolean destroy() {
         if ( this._isDestroyed.compareAndSet(false, true) ) {
-            this._listenerSupport.foreachComponent(new Visitor<Listener> () {
+            this._listenerSupport.foreachComponent(new Action1<Listener> () {
 
                 @Override
-                public void visit(final Listener listener) throws Exception {
-                    listener.onDestroyed(_owner);
+                public void call(final Listener listener) {
+                    try {
+                        listener.onDestroyed(_owner);
+                    } catch (Exception e) {
+                        LOG.warn("exception when onDestroyed, detail:{}", 
+                                ExceptionUtils.exception2detail(e));
+                    }
                 }});
             this._listenerSupport.clear();
             return  true;

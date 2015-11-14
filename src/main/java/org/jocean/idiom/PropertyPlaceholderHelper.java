@@ -12,6 +12,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rx.functions.Action2;
+
 /**
  * @author isdom
  *
@@ -40,7 +42,7 @@ public class PropertyPlaceholderHelper {
 
     private final boolean ignoreUnresolvablePlaceholders;
 
-    private final Visitor2<String, String>  _recordResolvedPlaceholder;
+    private final Action2<String, String>  _recordResolvedPlaceholder;
 
     /**
      * Creates a new <code>PropertyPlaceholderHelper</code> that uses the supplied prefix and suffix.
@@ -64,7 +66,7 @@ public class PropertyPlaceholderHelper {
     public PropertyPlaceholderHelper(
             final String placeholderPrefix, final String placeholderSuffix,
             final String valueSeparator, final boolean ignoreUnresolvablePlaceholders,
-            final Visitor2<String, String> recordResolvedPlaceholder) {
+            final Action2<String, String> recordResolvedPlaceholder) {
 
         _assertNotNull(placeholderPrefix, "placeholderPrefix must not be null");
         _assertNotNull(placeholderSuffix, "placeholderSuffix must not be null");
@@ -245,7 +247,7 @@ public class PropertyPlaceholderHelper {
     private void recordResolvedPlaceholder(final String placeholder, final String propVal) {
         if ( null != this._recordResolvedPlaceholder ) {
             try {
-                this._recordResolvedPlaceholder.visit(placeholder, propVal);
+                this._recordResolvedPlaceholder.call(placeholder, propVal);
             }
             catch (Exception e) {
                 LOG.warn("exception when recordResolvedPlaceholder for placeholder({}) with propVal({}), detail:{}",
