@@ -88,7 +88,9 @@ public class InterfaceUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T combineImpls(final Class<T> cls, final T ... impls) {
         final ClassLoader cl = getClassLoader(cls);
-        LOG.debug("combineImpls: using ClassLoader: {}", cl);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("combineImpls: using ClassLoader: {}", cl);
+        }
         
         return (T) Proxy.newProxyInstance(cl,
 				new Class<?>[]{cls}, new CompositeImplHandler<T>(impls));
