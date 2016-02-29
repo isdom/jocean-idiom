@@ -3,6 +3,7 @@ package org.jocean.idiom.rx;
 import java.util.Collection;
 import java.util.Map;
 
+import rx.Subscription;
 import rx.functions.Action0;
 
 public class RxActions {
@@ -25,6 +26,16 @@ public class RxActions {
             @Override
             public void call() {
                 collection.remove(value);
+            }};
+    }
+    
+    public static Action0 subscription2Action0(final Subscription subscription) {
+        return new Action0() {
+            @Override
+            public void call() {
+                if (!subscription.isUnsubscribed()) {
+                    subscription.unsubscribe();
+                }
             }};
     }
 }
