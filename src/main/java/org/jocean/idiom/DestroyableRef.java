@@ -3,6 +3,7 @@ package org.jocean.idiom;
 import java.util.concurrent.atomic.AtomicReference;
 
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 public class DestroyableRef<T> {
 
@@ -20,12 +21,19 @@ public class DestroyableRef<T> {
         }
     }
     
-    public void runIfNotNull(final Action1<T> action) {
+    public void submitIfNotNull(final Action1<T> action) {
         synchronized(this._ref) {
             final T impl = this._ref.get();
             if (null!=impl) {
                 action.call(impl);
             }
+        }
+    }
+    
+    public <R> R callIfNotNull(final Func1<T, R> func, final R ifNull) {
+        synchronized(this._ref) {
+            final T impl = this._ref.get();
+            return (null!=impl) ? func.call(impl) : ifNull;
         }
     }
     
