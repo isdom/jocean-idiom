@@ -26,7 +26,7 @@ public class StatefulRef<T> {
         synchronized(this._ref) {
             impl = this._ref.getAndSet(null);
         }
-        if (null!=impl) {
+        if (null!=impl && null!=actionWhenDestroying) {
             actionWhenDestroying.call(impl);
         }
     }
@@ -37,7 +37,7 @@ public class StatefulRef<T> {
             public void call() {
                 synchronized(_ref) {
                     final T impl = _ref.get();
-                    if (null!=impl) {
+                    if (null!=impl && null!=actionWhenActive) {
                         actionWhenActive.call(impl);
                     }
                 }
@@ -50,11 +50,15 @@ public class StatefulRef<T> {
                         synchronized(_ref) {
                             final T impl = _ref.get();
                             if (null!=impl) {
-                                actionWhenActive.call(impl);
+                                if (null!=actionWhenActive) {
+                                    actionWhenActive.call(impl);
+                                }
                                 return;
                             }
                         }
-                        actionWhenDestroyed.call();
+                        if (null!=actionWhenDestroyed) {
+                            actionWhenDestroyed.call();
+                        }
                     }};
             }};
             
