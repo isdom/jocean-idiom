@@ -11,6 +11,11 @@ import rx.functions.FuncN;
 
 public class StatefulRef<T> {
 
+    @SuppressWarnings("unchecked")
+    public static <E> E getArgAs(final int idx, final Object... args) {
+        return (E)args[idx];
+    }
+    
     public interface SubmitSuccessor extends ActionN {
         public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed);
     }
