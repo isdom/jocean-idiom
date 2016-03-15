@@ -13,7 +13,11 @@ public class StatefulRef<T> {
 
     @SuppressWarnings("unchecked")
     public static <E> E getArgAs(final int idx, final Object... args) {
-        return (E)args[idx];
+        if (null!=args && idx >= 0 && idx < args.length) {
+            return (E)args[idx];
+        } else {
+            throw new RuntimeException("invalid params");
+        }
     }
     
     public interface SubmitSuccessor extends ActionN {
