@@ -121,4 +121,12 @@ public class RxActions {
         fromAction0(final Action0 action0) {
         return new Action0Adaptor(action0);
     }
+
+    //  apply action to array's each element
+    public static <T> void applyArrayBy(final T[] array,
+            final Action1<T> actionToElement) {
+        for (T element : array) {
+            actionToElement.call(element);
+        }
+    }
 }
