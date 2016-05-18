@@ -9,7 +9,7 @@ import rx.functions.Action1;
 import rx.functions.ActionN;
 import rx.functions.FuncN;
 
-public class StatefulRef<T> {
+public class ActiveRef<T> {
 
     @SuppressWarnings("unchecked")
     public static <E> E getArgAs(final int idx, final Object... args) {
@@ -28,7 +28,7 @@ public class StatefulRef<T> {
         public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed);
     }
     
-    public StatefulRef(final T impl) {
+    public ActiveRef(final T impl) {
         this._ref = new AtomicReference<T>(impl);
     }
     
@@ -94,10 +94,11 @@ public class StatefulRef<T> {
                     public R call(final Object... args) {
                         synchronized(_ref) {
                             final T impl = _ref.get();
-                            return (null!=impl) 
-                                ? funcWhenActive.call(impl, args) 
-                                : funcWhenDestroyed.call(args);
+                            if (null!=impl) {
+                                return funcWhenActive.call(impl, args) ;
+                            }
                         }
+                        return funcWhenDestroyed.call(args);
                     }};
             }};
     }
