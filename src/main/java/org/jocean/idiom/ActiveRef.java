@@ -32,6 +32,10 @@ public class ActiveRef<T> {
         this._ref = new AtomicReference<T>(impl);
     }
     
+    public boolean isActive() {
+        return this._ref.get() != null;
+    }
+    
     public void destroy(final Action1<T> actionWhenDestroying) {
         T impl = null;
         synchronized(this._ref) {
