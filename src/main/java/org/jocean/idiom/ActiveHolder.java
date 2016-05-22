@@ -9,8 +9,9 @@ import rx.functions.Action1;
 import rx.functions.ActionN;
 import rx.functions.FuncN;
 
-public class ActiveRef<T> {
+public class ActiveHolder<T> {
 
+    //TODO:  remove to outside 
     @SuppressWarnings("unchecked")
     public static <E> E getArgAs(final int idx, final Object... args) {
         if (null!=args && idx >= 0 && idx < args.length) {
@@ -28,21 +29,21 @@ public class ActiveRef<T> {
         public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed);
     }
     
-    public ActiveRef(final T impl) {
-        this._ref = new AtomicReference<T>(impl);
+    public ActiveHolder(final T data) {
+        this._data = new AtomicReference<T>(data);
     }
     
     public boolean isActive() {
-        return this._ref.get() != null;
+        return this._data.get() != null;
     }
     
     public void destroy(final Action1<T> actionWhenDestroying) {
-        T impl = null;
-        synchronized(this._ref) {
-            impl = this._ref.getAndSet(null);
+        T data = null;
+        synchronized(this._data) {
+            data = this._data.getAndSet(null);
         }
-        if (null!=impl && null!=actionWhenDestroying) {
-            actionWhenDestroying.call(impl);
+        if (null!=data && null!=actionWhenDestroying) {
+            actionWhenDestroying.call(data);
         }
     }
     
@@ -50,10 +51,10 @@ public class ActiveRef<T> {
         return new SubmitSuccessor() {
             @Override
             public void call(final Object... args) {
-                synchronized(_ref) {
-                    final T impl = _ref.get();
-                    if (null!=impl && null!=actionWhenActive) {
-                        actionWhenActive.call(impl, args);
+                synchronized(_data) {
+                    final T data = _data.get();
+                    if (null!=data && null!=actionWhenActive) {
+                        actionWhenActive.call(data, args);
                     }
                 }
             }
@@ -62,11 +63,11 @@ public class ActiveRef<T> {
                 return new ActionN() {
                     @Override
                     public void call(final Object... args) {
-                        synchronized(_ref) {
-                            final T impl = _ref.get();
-                            if (null!=impl) {
+                        synchronized(_data) {
+                            final T data = _data.get();
+                            if (null!=data) {
                                 if (null!=actionWhenActive) {
-                                    actionWhenActive.call(impl, args);
+                                    actionWhenActive.call(data, args);
                                 }
                                 return;
                             }
@@ -84,9 +85,9 @@ public class ActiveRef<T> {
 
             @Override
             public R call(final Object... args) {
-                synchronized(_ref) {
-                    final T impl = _ref.get();
-                    return (null!=impl) ? funcWhenActive.call(impl, args) : null;
+                synchronized(_data) {
+                    final T data = _data.get();
+                    return (null!=data) ? funcWhenActive.call(data, args) : null;
                 }
             }
 
@@ -96,10 +97,10 @@ public class ActiveRef<T> {
 
                     @Override
                     public R call(final Object... args) {
-                        synchronized(_ref) {
-                            final T impl = _ref.get();
-                            if (null!=impl) {
-                                return funcWhenActive.call(impl, args) ;
+                        synchronized(_data) {
+                            final T data = _data.get();
+                            if (null!=data) {
+                                return funcWhenActive.call(data, args) ;
                             }
                         }
                         return funcWhenDestroyed.call(args);
@@ -107,5 +108,5 @@ public class ActiveRef<T> {
             }};
     }
     
-    private final AtomicReference<T> _ref;
+    private final AtomicReference<T> _data;
 }
