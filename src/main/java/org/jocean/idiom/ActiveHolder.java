@@ -10,16 +10,6 @@ import rx.functions.ActionN;
 import rx.functions.FuncN;
 
 public class ActiveHolder<T> {
-
-    //TODO:  remove to outside 
-    @SuppressWarnings("unchecked")
-    public static <E> E getArgAs(final int idx, final Object... args) {
-        if (null!=args && idx >= 0 && idx < args.length) {
-            return (E)args[idx];
-        } else {
-            throw new RuntimeException("invalid params");
-        }
-    }
     
     public interface SubmitSuccessor extends ActionN {
         public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed);

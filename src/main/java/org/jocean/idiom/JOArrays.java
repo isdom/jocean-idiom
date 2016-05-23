@@ -23,4 +23,13 @@ public class JOArrays {
         }
         return copy;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <E> E takeArgAs(final int idx, final Object... args) {
+        if (null!=args && idx >= 0 && idx < args.length) {
+            return (E)args[idx];
+        } else {
+            throw new RuntimeException("invalid params");
+        }
+    }
 }
