@@ -145,4 +145,12 @@ public class RxActions {
                 action.call(t);
             }};
     }
+
+    public static <T0, T1> Action2<T0, T1> toAction2(final ActionN action) {
+        return new Action2<T0, T1>() {
+            @Override
+            public void call(final T0 t1, final T1 t2) {
+                action.call(t1, t2);
+            }};
+    }
 }
