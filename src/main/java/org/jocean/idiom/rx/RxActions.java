@@ -138,6 +138,14 @@ public class RxActions {
             }};
     }
 
+    public static <T> Action1<T> toAction1(final Action0 action0) {
+        return new Action1<T>() {
+            @Override
+            public void call(final T t) {
+                action0.call();
+            }};
+    }
+    
     public static <T> Action1<T> toAction1(final ActionN action) {
         return new Action1<T>() {
             @Override
