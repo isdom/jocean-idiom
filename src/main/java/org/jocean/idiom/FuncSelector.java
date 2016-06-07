@@ -5,18 +5,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jocean.idiom.rx.Action1_N;
 import org.jocean.idiom.rx.Func1_N;
 
-import rx.functions.Action1;
 import rx.functions.ActionN;
 import rx.functions.FuncN;
 
 public class FuncSelector<T> {
     
-    public interface SubmitSuccessor extends ActionN {
-        public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed);
+    public interface SubmitSuccessor<T> extends ActionN {
+        public ActionN submitWhenDestroyed(final Action1_N<T> actionWhenDestroyed);
     }
     
-    public interface CallSuccessor<R> extends FuncN<R> {
-        public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed);
+    public interface CallSuccessor<T,R> extends FuncN<R> {
+        public FuncN<R> callWhenDestroyed(final Func1_N<T,R> funcWhenDestroyed);
     }
     
     public FuncSelector(final T data) {
@@ -27,18 +26,21 @@ public class FuncSelector<T> {
         return this._data.get() != null;
     }
     
-    public void destroy(final Action1<T> actionWhenDestroying) {
+    public void destroy(final Action1_N<T> actionWhenDestroying, final Object... args) {
         T data = null;
         synchronized(this._data) {
             data = this._data.getAndSet(null);
+            if (null!=data) {
+                this._destroyed = data;
+            }
         }
         if (null!=data && null!=actionWhenDestroying) {
-            actionWhenDestroying.call(data);
+            actionWhenDestroying.call(data, args);
         }
     }
     
-    public SubmitSuccessor submitWhenActive(final Action1_N<T> actionWhenActive) {
-        return new SubmitSuccessor() {
+    public SubmitSuccessor<T> submitWhenActive(final Action1_N<T> actionWhenActive) {
+        return new SubmitSuccessor<T>() {
             @Override
             public void call(final Object... args) {
                 synchronized(_data) {
@@ -48,8 +50,9 @@ public class FuncSelector<T> {
                     }
                 }
             }
+            
             @Override
-            public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed) {
+            public ActionN submitWhenDestroyed(final Action1_N<T> actionWhenDestroyed) {
                 return new ActionN() {
                     @Override
                     public void call(final Object... args) {
@@ -63,15 +66,15 @@ public class FuncSelector<T> {
                             }
                         }
                         if (null!=actionWhenDestroyed) {
-                            actionWhenDestroyed.call(args);
+                            actionWhenDestroyed.call(_destroyed, args);
                         }
                     }};
             }};
             
     }
     
-    public <R> CallSuccessor<R> callWhenActive(final Func1_N<T, R> funcWhenActive) {
-        return new CallSuccessor<R>() {
+    public <R> CallSuccessor<T,R> callWhenActive(final Func1_N<T, R> funcWhenActive) {
+        return new CallSuccessor<T,R>() {
 
             @Override
             public R call(final Object... args) {
@@ -82,7 +85,7 @@ public class FuncSelector<T> {
             }
 
             @Override
-            public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed) {
+            public FuncN<R> callWhenDestroyed(final Func1_N<T,R> funcWhenDestroyed) {
                 return new FuncN<R>() {
 
                     @Override
@@ -93,10 +96,11 @@ public class FuncSelector<T> {
                                 return funcWhenActive.call(data, args) ;
                             }
                         }
-                        return funcWhenDestroyed.call(args);
+                        return funcWhenDestroyed.call(_destroyed, args);
                     }};
             }};
     }
     
     private final AtomicReference<T> _data;
+    private volatile T _destroyed;
 }
