@@ -9,7 +9,7 @@ import rx.functions.Action1;
 import rx.functions.ActionN;
 import rx.functions.FuncN;
 
-public class ActiveHolder<T> {
+public class FuncSelector<T> {
     
     public interface SubmitSuccessor extends ActionN {
         public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed);
@@ -19,7 +19,7 @@ public class ActiveHolder<T> {
         public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed);
     }
     
-    public ActiveHolder(final T data) {
+    public FuncSelector(final T data) {
         this._data = new AtomicReference<T>(data);
     }
     
