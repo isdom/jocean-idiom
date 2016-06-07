@@ -1,19 +1,25 @@
 package org.jocean.idiom.rx;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
+
+import org.jocean.idiom.ExceptionUtils;
+import org.jocean.idiom.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import rx.Observable;
 import rx.Observable.Transformer;
 import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.functions.Action2;
-import rx.functions.ActionN;
 import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.functions.FuncN;
 
 public class RxFunctions {
+    private static final Logger LOG = 
+            LoggerFactory.getLogger(RxFunctions.class);
+    
     private RxFunctions() {
         throw new IllegalStateException("No instances!");
     }
@@ -60,5 +66,25 @@ public class RxFunctions {
             public R call(final T0 t1, final T1 t2) {
                 return func.call(t1, t2);
             }};
+    }
+
+    public static <T, R> Func1_N<T, R> toFunc1_N(final Class<T> cls, final String methodName) {
+        final Method method = ReflectUtils.getMethodNamed(cls, methodName);
+        if (null!=method) {
+            return new Func1_N<T, R>() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public R call(final T obj, final Object... args) {
+                    try {
+                        return (R)method.invoke(obj, args);
+                    } catch (Exception e) {
+                        LOG.warn("exception when invoke {}.{}, detail: {}",
+                                cls, method, ExceptionUtils.exception2detail(e));
+                        return null;
+                    }
+                }};
+        } else {
+            throw new RuntimeException("invalid method " + methodName +" for class " + cls);
+        }
     }
 }

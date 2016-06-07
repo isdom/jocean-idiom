@@ -211,4 +211,20 @@ public class ReflectUtils {
             return null;
         }
     }
+
+    public static Method getMethodNamed(final Class<?> cls, final String methodName) {
+        try {
+            final Method[] methods = cls.getDeclaredMethods();
+            for (Method m : methods) {
+                if (m.getName().equals(methodName)) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("exception when getDeclaredMethod for {}/{}, detail:{}",
+                    cls, methodName, ExceptionUtils.exception2detail(e));
+        }
+        return null;
+    }
 }

@@ -1,7 +1,13 @@
 package org.jocean.idiom.rx;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+
+import org.jocean.idiom.ExceptionUtils;
+import org.jocean.idiom.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import rx.Subscription;
 import rx.functions.Action0;
@@ -17,6 +23,10 @@ import rx.functions.Action9;
 import rx.functions.ActionN;
 
 public class RxActions {
+    
+    private static final Logger LOG = 
+            LoggerFactory.getLogger(RxActions.class);
+    
     private RxActions() {
         throw new IllegalStateException("No instances!");
     }
@@ -160,5 +170,23 @@ public class RxActions {
             public void call(final T0 t1, final T1 t2) {
                 action.call(t1, t2);
             }};
+    }
+
+    public static <T> Action1_N<T> toAction1_N(final Class<T> cls, final String methodName) {
+        final Method method = ReflectUtils.getMethodNamed(cls, methodName);
+        if (null!=method) {
+            return new Action1_N<T>() {
+                @Override
+                public void call(final T obj, final Object... args) {
+                    try {
+                        method.invoke(obj, args);
+                    } catch (Exception e) {
+                        LOG.warn("exception when invoke {}.{}, detail: {}",
+                                cls, method, ExceptionUtils.exception2detail(e));
+                    }
+                }};
+        } else {
+            throw new RuntimeException("invalid method " + methodName +" for class " + cls);
+        }
     }
 }
