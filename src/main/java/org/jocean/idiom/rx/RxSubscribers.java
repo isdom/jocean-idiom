@@ -2,6 +2,7 @@ package org.jocean.idiom.rx;
 
 import rx.Subscriber;
 import rx.functions.Action1;
+import rx.observers.SerializedSubscriber;
 
 public class RxSubscribers {
     private RxSubscribers() {
@@ -33,5 +34,13 @@ public class RxSubscribers {
 
     public static Action1<Throwable> nopOnError() {
         return NOP_ON_ERROR;
+    }
+    
+    public static <T> Subscriber<T> serialized(final Subscriber<T> subscriber) {
+        if (subscriber instanceof SerializedSubscriber) {
+            return subscriber;
+        } else {
+            return new SerializedSubscriber<T>(subscriber);
+        }
     }
 }
