@@ -189,4 +189,20 @@ public class RxActions {
             throw new RuntimeException("invalid method " + methodName +" for class " + cls);
         }
     }
+
+    public static <T0, T1> Action1<T1> bindParameter(final Action2<T0, T1> action2, final T0 t0) {
+        return new Action1<T1>() {
+            @Override
+            public void call(final T1 t1) {
+                action2.call(t0, t1);
+            }};
+    }
+
+    public static <T0> Action0 bindParameter(final Action1<T0> action1, final T0 t0) {
+        return new Action0() {
+            @Override
+            public void call() {
+                action1.call(t0);
+            }};
+    }
 }
