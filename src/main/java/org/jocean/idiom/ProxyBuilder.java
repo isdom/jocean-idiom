@@ -39,11 +39,16 @@ public class ProxyBuilder<T> {
 
     private Handler _handler = new Handler();
 
-    @SuppressWarnings("unchecked")
     public ProxyBuilder(final Class<T> intf) {
-        this._intfs = new Class[]{intf};
+        this(intf, null);
     }
 
+    @SuppressWarnings("unchecked")
+    public ProxyBuilder(final Class<T> intf, final T impl) {
+        this._intfs = new Class[]{intf};
+        this._ref.set(impl);
+    }
+    
     public ProxyBuilder(final Class<T>[] intfs) {
         this._intfs = Arrays.copyOf(intfs, intfs.length);
     }
