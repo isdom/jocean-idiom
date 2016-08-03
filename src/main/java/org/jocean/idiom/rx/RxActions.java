@@ -190,6 +190,14 @@ public class RxActions {
         }
     }
 
+    public static <T0, T1> Action0 bindParameter(final T0 t0, final T1 t1, final Action2<T0, T1> action2) {
+        return new Action0() {
+            @Override
+            public void call() {
+                action2.call(t0, t1);
+            }};
+    }
+    
     public static <T0, T1> Action1<T1> bindParameter(final T0 t0, final Action2<T0, T1> action2) {
         return new Action1<T1>() {
             @Override
