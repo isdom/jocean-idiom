@@ -2,6 +2,8 @@ package org.jocean.idiom;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Field;
+
 import org.junit.Test;
 
 public class ReflectUtilsTestCase {
@@ -70,5 +72,18 @@ public class ReflectUtilsTestCase {
         final A clonedA = ReflectUtils.invokeClone(a);
         
         assertEquals(a, clonedA);
+    }
+
+    public static class NonAnnotation {
+        @SuppressWarnings("unused")
+        private final String field1 = "test";
+    }
+    
+    @Test
+    public void testGetAnnotationFieldsOf() {
+        final Field[] testFields = ReflectUtils.getAnnotationFieldsOf(NonAnnotation.class, Test.class);
+        
+        assertNotNull(testFields);
+        assertEquals(0, testFields.length);
     }
 }
