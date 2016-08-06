@@ -8,7 +8,7 @@ package org.jocean.idiom;
  * @author isdom
  *
  */
-public class Features {
+public class SimpleFeatures {
     public static <E extends Enum<E>> boolean isEnabled(final int features, final E feature) {
         return (features & getMask(feature)) != 0;
     }
