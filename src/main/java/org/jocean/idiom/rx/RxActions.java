@@ -49,6 +49,23 @@ public class RxActions {
             }};
     }
     
+    public static <V> Action0 doAddAndNotify(final Collection<V> collection, final V value,final Action0 notifyme) {
+        collection.add(value);
+        try {
+            if (null != notifyme) {
+                notifyme.call();
+            }
+        } catch (Exception e) {
+            LOG.warn("exception when invoke notify{}, detail: {}",
+                    notifyme, ExceptionUtils.exception2detail(e));
+        }
+        return new Action0() {
+            @Override
+            public void call() {
+                collection.remove(value);
+            }};
+    }
+    
     public static Action0 subscription2Action0(final Subscription subscription) {
         return new Action0() {
             @Override
