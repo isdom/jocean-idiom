@@ -68,7 +68,7 @@ public class ByteArrayListInputStream extends InputStream {
     protected int count = 0;
 
     private byte[] currentBuf() {
-    	return	bufs.get(idxOfBuf);
+        return bufs.get(idxOfBuf);
     }
     
     /**
