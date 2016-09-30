@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import sun.misc.Unsafe;
 
+@SuppressWarnings("restriction")
 public class UnsafeOp {
     private static Unsafe getUnsafe() {
         try {

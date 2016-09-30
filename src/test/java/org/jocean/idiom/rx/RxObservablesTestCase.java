@@ -23,7 +23,7 @@ public class RxObservablesTestCase {
         testSubscriber.assertReceivedOnNext(Arrays.asList("hello", "world"));
         testSubscriber.assertNoErrors();
         // onCompleted not called
-        assertTrue(testSubscriber.getOnCompletedEvents().isEmpty());
+        assertTrue(testSubscriber.getCompletions() == 0);
     }
 
     @Test
@@ -44,6 +44,6 @@ public class RxObservablesTestCase {
         // no error
         testSubscriber.assertNoErrors();
         // onCompleted called
-        assertEquals(1, testSubscriber.getOnCompletedEvents().size());
+        assertEquals(1, testSubscriber.getCompletions());
     }
 }
