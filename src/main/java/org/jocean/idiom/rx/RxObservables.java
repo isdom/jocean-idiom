@@ -13,7 +13,6 @@ import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Observable.Operator;
 import rx.Observable.Transformer;
-import rx.Observer;
 import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -72,19 +71,10 @@ public class RxObservables {
     }
 
     //  for Action0 addListener(final T listener)
-    public static <T> Observer<Action1<T>> asObserver(final T listener) {
-        return new  Observer<Action1<T>>() {
+    public static <T> Action1<? super Action1<T>> asOnNext(final T listener) {
+        return new  Action1<Action1<T>>() {
             @Override
-            public void onCompleted() {
-            }
-
-            @Override
-            public void onError(final Throwable e) {
-                
-            }
-
-            @Override
-            public void onNext(final Action1<T> action) {
+            public void call(final Action1<T> action) {
                 action.call(listener);
             }};
     }
