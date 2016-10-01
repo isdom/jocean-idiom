@@ -1,6 +1,10 @@
+/bin/
 /bin/*
+/build/
 /build/*
+/logs/
 /logs/*
+/.settings/
 /.settings/*
 .gradle
 .DS_Store
