@@ -2,6 +2,7 @@ apply from: 'http://git.medtap.cn/jocean/devconf/raw/master/devconf/build-lib.gr
 
 configurations {
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     all*.exclude group: 'log4j', module: 'log4j'
     all*.exclude group: 'commons-logging', module: 'commons-logging'
     all { resolutionStrategy.cacheChangingModulesFor 1, 'minutes' }
@@ -9,7 +10,7 @@ configurations {
 
 dependencies {
     /* log */
-    compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'org.slf4j:slf4j-api:1.7.21'
     
     compile 'io.reactivex:rxjava:1.2.1'
     
