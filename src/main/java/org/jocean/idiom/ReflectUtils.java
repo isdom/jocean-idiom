@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReflectUtils {
 	
+    private static final Field[] EMPTY_FIELDS = new Field[0];
     private static final Logger LOG = 
             LoggerFactory.getLogger(ReflectUtils.class);
     
@@ -128,7 +129,7 @@ public class ReflectUtils {
     }
     
     public static Field[] getAllFieldsOfClass(final Class<?> cls) {
-        Field[] fields = new Field[0];
+        Field[] fields = EMPTY_FIELDS;
         
         Class<?> itr = cls;
         while ( (null != itr) && !itr.equals(Object.class)) {
@@ -155,7 +156,7 @@ public class ReflectUtils {
             itr = itr.getSuperclass();
         }
         
-        return  fs.toArray(new Field[0]);
+        return  fs.toArray(EMPTY_FIELDS);
 	}
 	
 	public static Method[]   getAnnotationMethodsOf(
