@@ -12,7 +12,7 @@ dependencies {
     /* log */
     compile 'org.slf4j:slf4j-api:1.7.21'
     
-    compile 'io.reactivex:rxjava:1.2.2'
+    compile 'io.reactivex:rxjava:1.2.3'
     
     testCompile 'junit:junit:4.12'
 }
