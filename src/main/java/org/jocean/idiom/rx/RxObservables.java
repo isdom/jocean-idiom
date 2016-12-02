@@ -3,6 +3,7 @@ package org.jocean.idiom.rx;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
 
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.ReflectUtils;
@@ -17,6 +18,8 @@ import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func0;
+import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.subscriptions.Subscriptions;
 
 public class RxObservables {
@@ -147,5 +150,92 @@ public class RxObservables {
                 }
                 return null;
             }});
+    }
+
+    public static Transformer<? super Throwable, ? extends Object> retryIfMatch(
+            final Class<? extends Throwable> clazzException) {
+        return retryIfMatch(clazzException, 100);
+    }
+    
+    public static Transformer<? super Throwable, ? extends Object> retryIfMatch(
+            final Class<? extends Throwable> clazzException, final long delayOfCompletedInMs) {
+        final Func1<Throwable, Observable<?>> func1 = new Func1<Throwable, Observable<?>>() {
+            @Override
+            public Observable<?> call(final Throwable error) {
+                // For TransportException, we retry
+                if (clazzException.isInstance(error)) {
+                    LOG.info("retryIfMatch: match error({}), start to retry with delay completed {} ms", 
+                            ExceptionUtils.exception2detail(error), delayOfCompletedInMs);
+                    return Observable.concat(Observable.just(null), 
+                        Observable.empty().delay(delayOfCompletedInMs, TimeUnit.MILLISECONDS));
+                }
+
+                LOG.info("retryIfMatch: NOT match {} bcs of error({}), abort retry", 
+                        clazzException, ExceptionUtils.exception2detail(error));
+                // For anything else, don't retry
+                return Observable.error(error);
+            }
+        };
+        
+        return new Transformer<Throwable, Object>() {
+            @Override
+            public Observable<Object> call(final Observable<Throwable> source) {
+                return source.flatMap(func1);
+            }};
+    }
+    
+    public static Transformer<? super Object, ? extends Integer> retryMaxTimes(final int maxTimes) {
+        return retryMaxTimes(maxTimes, 100);
+    }
+    
+    public static Transformer<? super Object, ? extends Integer> retryMaxTimes(
+            final int maxTimes, final long delayOfCompletedInMs) {
+        return new Transformer<Object, Integer>() {
+            @Override
+            public Observable<Integer> call(final Observable<Object> source) {
+                return source.zipWith(Observable.<Integer>concat(Observable.range(1, maxTimes), 
+                        Observable.<Integer>empty().delay(delayOfCompletedInMs, TimeUnit.MILLISECONDS)),
+                        new Func2<Object, Integer, Integer>() {
+                            @Override
+                            public Integer call(final Object obj, final Integer times) {
+                                LOG.info("retryMaxTimes: retry for NO.({}) with delay completed {} ms",
+                                        times, delayOfCompletedInMs); 
+                                return times;
+                            }
+                        });
+            }
+        };
+    }
+
+    public static Transformer<? super Integer, ? extends Object> retryDelayTo(
+            final int delayBaseInSecond) {
+        final Func1<Integer, Observable<? extends Object>> func1 = 
+        new Func1<Integer, Observable<? extends Object>>() {
+            @Override
+            public Observable<? extends Object> call(final Integer retryCount) {
+                final long interval = (long) Math.pow(delayBaseInSecond, retryCount);
+                LOG.info("retryDelayTo: retry for NO.({}) and delay for {} second(s)",
+                        retryCount, interval); 
+                return Observable.timer(interval, TimeUnit.SECONDS);
+            }
+        };
+        return new Transformer<Integer, Object>() {
+            @Override
+            public Observable<Object> call(final Observable<Integer> source) {
+                return source.flatMap(func1);
+            }};
+    }
+
+    public interface RetryPolicy<T> extends Transformer<Throwable,T> {};
+
+    public static <T> Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryWith(
+            final RetryPolicy<T> policy) {
+        return new Func1<Observable<? extends Throwable>, Observable<?>>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public Observable<?> call(final Observable<? extends Throwable> errors) {
+                return policy.call((Observable<Throwable>)errors);
+            }
+        };
     }
 }
