@@ -167,6 +167,23 @@ public class RxObservables {
                     LOG.info("retryIfMatch: match error({}), start to retry with delay completed {} ms", 
                             ExceptionUtils.exception2detail(error), delayOfCompletedInMs);
                     return Observable.concat(Observable.just(null), 
+                        // 此处通过 concat + empty + delay 添加延时的 completed 触发, 原因是：
+                        /**
+                         * reference: http://blog.danlew.net/2016/01/25/rxjavas-repeatwhen-and-retrywhen-explained/
+                         * --------------------------------------------------------------------------------------------
+                         * The emissions of the Observable<?> returned determines whether or not resubscription happens. 
+                         * If it emits onCompleted or onError then it doesn't resubscribe. But if it emits onNext then 
+                         * it does (regardless of what's actually in the onNext). That's why it's using the wildcard for 
+                         * its generic type: it's just the notification (next, error or completed) that matters.
+                         *  翻译:
+                         *  被返回的 Observable<?> 所要发送的事件决定了重订阅是否会发生。如果发送的是 onCompleted 或者 
+                         *  onError 事件，将不会触发重订阅。相对的，如果它发送 onNext 事件，则触发重订阅（不管onNext 实际上是什么事件）。
+                         *  这就是为什么使用了通配符作为泛型类型：这仅仅是个通知（next, error或者completed），一个很重要的通知而已。
+                         * --------------------------------------------------------------------------------------------
+                         *  实验发现，如果直接返回 just(null)，由于在 onNext(null) 之后 立刻会调用 onCompleted()
+                         *  因此 re-subscribe 的行为没有被触发，推测，紧接着的 onCompleted() 阻止了re-subscribe，
+                         *  故而需要延后 onCompleted() 调用时机，即 concat + empty + delay 添加延时的 completed 触发
+                         */
                         Observable.empty().delay(delayOfCompletedInMs, TimeUnit.MILLISECONDS));
                 }
 
@@ -194,6 +211,7 @@ public class RxObservables {
             @Override
             public Observable<Integer> call(final Observable<Object> source) {
                 return source.zipWith(Observable.<Integer>concat(Observable.range(1, maxTimes), 
+                        // 此处通过 concat + empty + delay 添加延时的 completed 触发, 原因参见 retryIfMatch 中注释
                         Observable.<Integer>empty().delay(delayOfCompletedInMs, TimeUnit.MILLISECONDS)),
                         new Func2<Object, Integer, Integer>() {
                             @Override
