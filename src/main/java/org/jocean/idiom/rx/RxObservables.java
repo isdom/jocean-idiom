@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.ReflectUtils;
@@ -256,4 +257,32 @@ public class RxObservables {
             }
         };
     }
+    
+    private static final Transformer<Object, Object> ENSURE_SUBSCR_ATMOSTONCE = 
+        new Transformer<Object, Object>() {
+        @Override
+        public Observable<Object> call(final Observable<Object> source) {
+            final AtomicBoolean hasSubscribed = new AtomicBoolean(false);
+            
+            return source.doOnSubscribe(new Action0() {
+                @Override
+                public void call() {
+                    if (hasSubscribed.compareAndSet(false, true)) {
+                        LOG.info("Observable ({}) is subscribed now", source);
+                    } else {
+                        LOG.warn("Observable ({}) is subscribed already, can't subscribe again!", 
+                                source);
+                        // operator has subscribed before, throw Exception
+                        throw new RuntimeException(source + " can't subscribed more than once");
+                    }
+                }})
+            ;
+        }
+    };
+    
+    @SuppressWarnings("unchecked")
+    public static <T> Transformer<T,T> ensureSubscribeAtmostOnce() {
+        return (Transformer<T,T>)ENSURE_SUBSCR_ATMOSTONCE;
+    }
+    
 }
