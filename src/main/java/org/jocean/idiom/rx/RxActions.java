@@ -21,6 +21,7 @@ import rx.functions.Action7;
 import rx.functions.Action8;
 import rx.functions.Action9;
 import rx.functions.ActionN;
+import rx.functions.Func1;
 
 public class RxActions {
     
@@ -47,6 +48,10 @@ public class RxActions {
             public void call() {
                 collection.remove(value);
             }};
+    }
+    
+    public static <V> Action0 doCall(final Func1<V, Action0> func, final V value) {
+        return func.call(value);
     }
     
     public static <V> Action0 doAddAndNotify(final Collection<V> collection, final V value,final Action0 notifyme) {
