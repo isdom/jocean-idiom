@@ -12,6 +12,6 @@ public class Regexs {
     }
     
     public static boolean isMatched(final Pattern pattern, final String content) {
-        return pattern != null ? pattern.matcher(content).find() : true;
+        return pattern != null ? pattern.matcher(null != content ? content : "").find() : true;
     }
 }
