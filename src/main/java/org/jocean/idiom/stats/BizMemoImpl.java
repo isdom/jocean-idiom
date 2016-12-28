@@ -3,6 +3,7 @@
  */
 package org.jocean.idiom.stats;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jocean.idiom.ReflectUtils;
@@ -30,6 +31,14 @@ public abstract class BizMemoImpl<IMPL extends BizMemoImpl<IMPL,STEP,RESULT>,
         initCountersAndMemos(this._resultCounters, this._resultMemos);
     }
 
+    public boolean isRecorded() {
+        return this._isRecorded.get();
+    }
+    
+    private void setRecorded() {
+        this._isRecorded.set(true);
+    }
+    
     private static void initCountersAndMemos(
             final AtomicInteger[] counters, 
             final TimeIntervalMemo[] memos) {
@@ -41,17 +50,20 @@ public abstract class BizMemoImpl<IMPL extends BizMemoImpl<IMPL,STEP,RESULT>,
 
     @Override
     public void beginBizStep(final STEP step) {
+        setRecorded();
         this._stepCounters[step.ordinal()].incrementAndGet();
     }
 
     @Override
     public void endBizStep(final STEP step, final long ttl) {
+        setRecorded();
         this._stepCounters[step.ordinal()].decrementAndGet();
         this._stepMemos[step.ordinal()].recordInterval(ttl);
     }
 
     @Override
     public void incBizResult(final RESULT result, final long ttl) {
+        setRecorded();
         this._resultCounters[result.ordinal()].incrementAndGet();
         this._resultMemos[result.ordinal()].recordInterval(ttl);
     }
@@ -111,6 +123,7 @@ public abstract class BizMemoImpl<IMPL extends BizMemoImpl<IMPL,STEP,RESULT>,
         return cls.getSimpleName().equals(type) ? E.valueOf(cls, name) : null;
     }
     
+    private final AtomicBoolean _isRecorded = new AtomicBoolean(false);
     protected final Class<STEP> _clsStep;
     protected final Class<RESULT> _clsResult;
     protected final STEP[] _steps;
