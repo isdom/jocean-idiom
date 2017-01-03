@@ -281,8 +281,8 @@ public class RxObservables {
     };
     
     @SuppressWarnings("unchecked")
-    public static <T> Transformer<T,T> ensureSubscribeAtmostOnce() {
-        return (Transformer<T,T>)ENSURE_SUBSCR_ATMOSTONCE;
+    public static <T> Transformer<? super T,? extends T> ensureSubscribeAtmostOnce() {
+        return (Transformer<? super T,? extends T>)ENSURE_SUBSCR_ATMOSTONCE;
     }
     
 }
