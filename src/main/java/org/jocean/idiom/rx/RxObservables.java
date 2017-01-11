@@ -3,8 +3,10 @@ package org.jocean.idiom.rx;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.ReflectUtils;
@@ -263,15 +265,30 @@ public class RxObservables {
         @Override
         public Observable<Object> call(final Observable<Object> source) {
             final AtomicBoolean hasSubscribed = new AtomicBoolean(false);
+            final AtomicReference<String> callStackDump = new AtomicReference<>();
+            final CountDownLatch callStackDumpAvailable = new CountDownLatch(1);
             
             return source.doOnSubscribe(new Action0() {
                 @Override
                 public void call() {
                     if (hasSubscribed.compareAndSet(false, true)) {
-                        LOG.info("Observable ({}) is subscribed now", source);
+                        callStackDump.set(ExceptionUtils.dumpCallStack(new Throwable(), "", 1));
+                        callStackDumpAvailable.countDown();
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Observable ({}) is subscribed now", source);
+                        }
                     } else {
+                        try {
+                            callStackDumpAvailable.await();
+                        } catch (InterruptedException e) {
+                        }
                         LOG.warn("Observable ({}) is subscribed already, can't subscribe again!", 
                                 source);
+                        LOG.warn("Observable ({}) prev subscribe call from {}, \nAND this failure call from {}", 
+                                source, 
+                                callStackDump.get(), 
+                                ExceptionUtils.dumpCallStack(new Throwable(), "", 1));
+                        
                         // operator has subscribed before, throw Exception
                         throw new RuntimeException(source + " can't subscribed more than once");
                     }
