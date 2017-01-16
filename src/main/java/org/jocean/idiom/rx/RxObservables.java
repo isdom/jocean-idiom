@@ -155,18 +155,31 @@ public class RxObservables {
             }});
     }
 
-    public static Transformer<? super Throwable, ? extends Object> retryIfMatch(
-            final Class<? extends Throwable> clazzException) {
-        return retryIfMatch(clazzException, 100);
+    private static final Func1<Throwable, Boolean> matcherOfType(final Class<? extends Throwable> clazzException) {
+        return new Func1<Throwable, Boolean>() {
+            @Override
+            public Boolean call(final Throwable e) {
+                return clazzException.isInstance(e);
+            }
+            
+            @Override
+            public String toString() {
+                return clazzException.toString();
+            }};
     }
     
     public static Transformer<? super Throwable, ? extends Object> retryIfMatch(
-            final Class<? extends Throwable> clazzException, final long delayOfCompletedInMs) {
+            final Class<? extends Throwable> clazzException) {
+        return retryIfMatch(matcherOfType(clazzException), 100);
+    }
+    
+    public static Transformer<? super Throwable, ? extends Object> retryIfMatch(
+            final Func1<Throwable, Boolean> isMatch, final long delayOfCompletedInMs) {
         final Func1<Throwable, Observable<?>> func1 = new Func1<Throwable, Observable<?>>() {
             @Override
             public Observable<?> call(final Throwable error) {
                 // For TransportException, we retry
-                if (clazzException.isInstance(error)) {
+                if (isMatch.call(error)) {
                     LOG.info("retryIfMatch: match error({}), start to retry with delay completed {} ms", 
                             ExceptionUtils.exception2detail(error), delayOfCompletedInMs);
                     return Observable.concat(Observable.just(null), 
@@ -191,7 +204,7 @@ public class RxObservables {
                 }
 
                 LOG.info("retryIfMatch: NOT match {} bcs of error({}), abort retry", 
-                        clazzException, ExceptionUtils.exception2detail(error));
+                        isMatch, ExceptionUtils.exception2detail(error));
                 // For anything else, don't retry
                 return Observable.error(error);
             }
