@@ -93,9 +93,9 @@ public class RetryWhenTestCase {
             public void call(Throwable t) {
                 counter.incrementAndGet();
             }})
-        .retryWhen(RxObservables.retryWith(new RetryPolicy<Object>() {
+        .retryWhen(RxObservables.retryWith(new RetryPolicy<Integer>() {
             @Override
-            public Observable<Object> call(Observable<Throwable> errors) {
+            public Observable<Integer> call(Observable<Throwable> errors) {
                 return errors.compose(RxObservables.retryMaxTimes(1))
                         .compose(RxObservables.retryDelayTo(1))
                         ;

@@ -241,21 +241,25 @@ public class RxObservables {
         };
     }
 
-    public static Transformer<? super Integer, ? extends Object> retryDelayTo(
+    public static Transformer<? super Integer, ? extends Integer> retryDelayTo(
             final int delayBaseInSecond) {
-        final Func1<Integer, Observable<? extends Object>> func1 = 
-        new Func1<Integer, Observable<? extends Object>>() {
+        final Func1<Integer, Observable<? extends Integer>> func1 = 
+        new Func1<Integer, Observable<? extends Integer>>() {
             @Override
-            public Observable<? extends Object> call(final Integer retryCount) {
+            public Observable<? extends Integer> call(final Integer retryCount) {
                 final long interval = (long) Math.pow(delayBaseInSecond, retryCount);
                 LOG.info("retryDelayTo: retry for NO.({}) and delay for {} second(s)",
                         retryCount, interval); 
-                return Observable.timer(interval, TimeUnit.SECONDS);
+                return Observable.timer(interval, TimeUnit.SECONDS).map(new Func1<Long, Integer>() {
+                    @Override
+                    public Integer call(final Long l) {
+                        return retryCount;
+                    }});
             }
         };
-        return new Transformer<Integer, Object>() {
+        return new Transformer<Integer, Integer>() {
             @Override
-            public Observable<Object> call(final Observable<Integer> source) {
+            public Observable<Integer> call(final Observable<Integer> source) {
                 return source.flatMap(func1);
             }};
     }
