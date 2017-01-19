@@ -28,11 +28,11 @@ public class RxSubscribers {
         }};
 
     @SuppressWarnings("unchecked")
-    public static <T> Action1<T> nopOnNext() {
+    public static <T> Action1<T> ignoreNext() {
         return (Action1<T>)NOP_ON_NEXT;
     }
 
-    public static Action1<Throwable> nopOnError() {
+    public static Action1<Throwable> ignoreError() {
         return NOP_ON_ERROR;
     }
     
