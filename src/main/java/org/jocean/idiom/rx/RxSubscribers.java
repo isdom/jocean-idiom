@@ -1,5 +1,7 @@
 package org.jocean.idiom.rx;
 
+import org.jocean.idiom.COWCompositeSupport;
+
 import rx.Subscriber;
 import rx.functions.Action1;
 import rx.observers.SerializedSubscriber;
@@ -42,5 +44,37 @@ public class RxSubscribers {
         } else {
             return new SerializedSubscriber<T>(subscriber);
         }
+    }
+
+    public static <T> Subscriber<T> asSubscriber(
+            final COWCompositeSupport<Subscriber<T>> composite) {
+        final Action1<Subscriber<T>> onCompleted = new Action1<Subscriber<T>>() {
+            @Override
+            public void call(final Subscriber<T> subscriber) {
+                subscriber.onCompleted();
+            }};
+        return new Subscriber<T>() {
+            @Override
+            public void onCompleted() {
+                composite.foreachComponent(onCompleted);
+            }
+   
+            @Override
+            public void onError(final Throwable e) {
+                composite.foreachComponent(new Action1<Subscriber<T>>() {
+                    @Override
+                    public void call(final Subscriber<T> subscriber) {
+                        subscriber.onError(e);
+                    }});
+            }
+   
+            @Override
+            public void onNext(final T obj) {
+                composite.foreachComponent(new Action1<Subscriber<T>>() {
+                    @Override
+                    public void call(final Subscriber<T> subscriber) {
+                        subscriber.onNext(obj);
+                    }});
+            }};
     }
 }

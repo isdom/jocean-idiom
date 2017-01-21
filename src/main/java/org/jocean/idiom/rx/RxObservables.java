@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jocean.idiom.COWCompositeSupport;
 import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.ReflectUtils;
 import org.slf4j.Logger;
@@ -323,4 +324,20 @@ public class RxObservables {
         return (Transformer<? super T,? extends T>)ENSURE_SUBSCR_ATMOSTONCE;
     }
     
+    public static <T> Observable<T> asObservable(
+            final COWCompositeSupport<Subscriber<T>> composite) {
+        return Observable.create(new Observable.OnSubscribe<T>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void call(final Subscriber<? super T> subscriber) {
+                if (!subscriber.isUnsubscribed()) {
+                    composite.addComponent((Subscriber<T>)subscriber);
+                    subscriber.add(Subscriptions.create(new Action0() {
+                        @Override
+                        public void call() {
+                            composite.removeComponent((Subscriber<T>)subscriber);
+                        }}));
+                }
+            }});
+    }
 }
