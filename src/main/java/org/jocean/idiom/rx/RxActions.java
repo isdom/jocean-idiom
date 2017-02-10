@@ -235,4 +235,12 @@ public class RxActions {
                 action1.call(t0);
             }};
     }
+
+    public static <T1, T2> Action1<T2> map(final Action1<T1> action1, final Func1<T2, T1> func) {
+        return new Action1<T2>() {
+            @Override
+            public void call(T2 t2) {
+                action1.call(func.call(t2));
+            }};
+    }
 }
