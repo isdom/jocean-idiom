@@ -15,6 +15,10 @@ public class TerminateAwareSupport<T> implements TerminateAware<T> {
     public TerminateAwareSupport(final T self, final FuncSelector<T> selector) {
         this._self = self;
         this._selector = selector;
+        this._doAddTerminate = 
+            RxActions.toAction1(this._selector
+            .submitWhenActive(ADD_TERMINATE)
+            .submitWhenDestroyed(CALL_TERMINATE_NOW));
     }
     
     @Override
@@ -62,11 +66,8 @@ public class TerminateAwareSupport<T> implements TerminateAware<T> {
                     final Object... args) {
                 ((Action1<T>)args[0]).call(_self);
             }};
-            
-    private final Action1<Action1<T>> _doAddTerminate = 
-        RxActions.toAction1(this._selector
-            .submitWhenActive(ADD_TERMINATE)
-            .submitWhenDestroyed(CALL_TERMINATE_NOW));
+
+    private final Action1<Action1<T>> _doAddTerminate;
     
     public void fireAllTerminates() {
         this._onTerminates.foreachComponent(this._callOnTerminate);
