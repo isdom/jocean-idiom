@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
-public class TerminateAwareSupport<T> implements TerminateAware<T> {
+public class TerminateAwareSupport<T, F> implements TerminateAware<T> {
     private static final Logger LOG =
             LoggerFactory.getLogger(TerminateAwareSupport.class);
     
-    public TerminateAwareSupport(final T self, final FuncSelector<T> selector) {
+    public TerminateAwareSupport(final T self, final FuncSelector<F> selector) {
         this._self = self;
         this._selector = selector;
         this._doAddTerminate = 
@@ -30,11 +30,11 @@ public class TerminateAwareSupport<T> implements TerminateAware<T> {
             }};
     }
     
-    private final Action1_N<T> REMOVE_TERMINATE = 
-        new Action1_N<T>() {
+    private final Action1_N<F> REMOVE_TERMINATE = 
+        new Action1_N<F>() {
             @SuppressWarnings("unchecked")
             @Override
-            public void call(final T t,
+            public void call(final F t,
                     final Object... args) {
                 _onTerminates.removeComponent((Action1<T>)args[0]);
             }};
@@ -49,20 +49,20 @@ public class TerminateAwareSupport<T> implements TerminateAware<T> {
             }};
     }
     
-    private final Action1_N<T> ADD_TERMINATE = 
-        new Action1_N<T>() {
+    private final Action1_N<F> ADD_TERMINATE = 
+        new Action1_N<F>() {
             @SuppressWarnings("unchecked")
             @Override
-            public void call(final T t,
+            public void call(final F t,
                     final Object... args) {
                 _onTerminates.addComponent((Action1<T>)args[0]);
             }};
                 
-    private final Action1_N<T> CALL_TERMINATE_NOW = 
-        new Action1_N<T>() {
+    private final Action1_N<F> CALL_TERMINATE_NOW = 
+        new Action1_N<F>() {
             @SuppressWarnings("unchecked")
             @Override
-            public void call(final T t,
+            public void call(final F t,
                     final Object... args) {
                 ((Action1<T>)args[0]).call(_self);
             }};
@@ -89,5 +89,5 @@ public class TerminateAwareSupport<T> implements TerminateAware<T> {
             new COWCompositeSupport<>();
     
     private final T _self;
-    private final FuncSelector<T> _selector;
+    private final FuncSelector<F> _selector;
 }
