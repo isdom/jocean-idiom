@@ -26,8 +26,22 @@ public class TerminateAwareSupport<T, F> implements TerminateAware<T> {
         return new Action1<Action0>() {
             @Override
             public void call(final Action0 action) {
-                doOnTerminate(RxActions.<T>toAction1(action));
+                doOnTerminate(action);
             }};
+    }
+    
+    @Override
+    public Action1<Action1<T>> onTerminateOf() {
+        return new Action1<Action1<T>>() {
+            @Override
+            public void call(final Action1<T> action) {
+                doOnTerminate(action);
+            }};
+    }
+
+    @Override
+    public Action0 doOnTerminate(final Action0 onTerminate) {
+        return doOnTerminate(RxActions.<T>toAction1(onTerminate));
     }
     
     private final Action1_N<F> REMOVE_TERMINATE = 
