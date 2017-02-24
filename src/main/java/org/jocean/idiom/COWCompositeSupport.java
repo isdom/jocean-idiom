@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jocean.idiom.rx.Action1_N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +75,22 @@ public class COWCompositeSupport<T> {
     	}
 	}
 	
+    public void foreachComponent(final Action1_N<T> visitor, final Object...args) {
+        final List<T> current = this._components.get();
+        if ( null != current ) {
+            for ( int idx = 0; idx < current.size(); idx++) {
+                final T component = current.get(idx);
+                try {
+                    visitor.call(component, args);
+                }
+                catch (Exception e) {
+                    LOG.error("exception when call COWCompositeSupport.foreachComponent, detail:{}",
+                            ExceptionUtils.exception2detail(e));
+                }
+            }
+        }
+    }
+    
 	public void clear() {
 		synchronized( this._components) {
 			final List<T> old = _components.getAndSet(null);
