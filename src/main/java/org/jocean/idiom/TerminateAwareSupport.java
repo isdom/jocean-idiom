@@ -1,7 +1,6 @@
 package org.jocean.idiom;
 
 import org.jocean.idiom.rx.Action1_N;
-import org.jocean.idiom.rx.Func1_N;
 import org.jocean.idiom.rx.RxActions;
 import org.jocean.idiom.rx.RxFunctions;
 import org.slf4j.Logger;
@@ -10,71 +9,58 @@ import org.slf4j.LoggerFactory;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Actions;
-import rx.functions.Func2;
+import rx.functions.Func3;
+import rx.functions.FuncN;
 
-public class TerminateAwareSupport<T, F> implements TerminateAware<T> {
+public class TerminateAwareSupport<T> {
     private static final Logger LOG =
             LoggerFactory.getLogger(TerminateAwareSupport.class);
     
-    public TerminateAwareSupport(final FuncSelector<F> selector) {
+    public TerminateAwareSupport(final FuncSelector selector) {
         this._doAddTerminate = 
-            RxFunctions.toFunc2(selector
-            .callWhenActive(addOnTerminate0())
-            .callWhenDestroyed(callTerminateNow()));
+            RxFunctions.toFunc3(selector
+            .callWhenActive(ADD_TERMINATE)
+            .callWhenDestroyed(CALL_TERMINATE_NOW));
     }
 
     public void fireAllTerminates(final T self) {
         this._onTerminates.foreachComponent(_CALL_ONTERMINATE, self);
     }
     
-    @Override
-    public Action1<Action0> onTerminate() {
+    public Action1<Action0> onTerminate(final T self) {
         return new Action1<Action0>() {
             @Override
             public void call(final Action0 action) {
-                doOnTerminate(action);
+                doOnTerminate(self, action);
             }};
     }
     
-    @Override
-    public Action1<Action1<T>> onTerminateOf() {
+    public Action1<Action1<T>> onTerminateOf(final T self) {
         return new Action1<Action1<T>>() {
             @Override
             public void call(final Action1<T> action) {
-                doOnTerminate(action);
+                doOnTerminate(self, action);
             }};
     }
 
-    @Override
-    public Action0 doOnTerminate(final Action0 onTerminate) {
-        return doOnTerminate(RxActions.<T>toAction1(onTerminate));
+    public Action0 doOnTerminate(final T self, final Action0 onTerminate) {
+        return doOnTerminate(self, RxActions.<T>toAction1(onTerminate));
     }
     
-    @Override
-    public Action0 doOnTerminate(final Action1<T> onTerminate) {
-        return this._doAddTerminate.call(this, onTerminate);
+    public Action0 doOnTerminate(final T self, final Action1<T> onTerminate) {
+        return this._doAddTerminate.call(self, this, onTerminate);
     }
     
-    @SuppressWarnings("unchecked")
-    private Func1_N<F, Action0> addOnTerminate0() {
-        return (Func1_N<F, Action0>)ADD_TERMINATE;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Func1_N<F, Action0> callTerminateNow() {
-        return (Func1_N<F, Action0>) CALL_TERMINATE_NOW;
-    }
-            
-    private static final Func1_N<Object, Action0> ADD_TERMINATE = 
-        new Func1_N<Object, Action0>() {
+    private static final FuncN<Action0> ADD_TERMINATE = 
+        new FuncN<Action0>() {
             @Override
-            public Action0 call(final Object t,
-                    final Object... args) {
-                // args[0]: TerminateAwareSupport.this
-                // args[1]: Action1<T>
-                final TerminateAwareSupport<?,?> support = (TerminateAwareSupport<?,?>)args[0];
+            public Action0 call(final Object... args) {
+                // args[0]: T self
+                // args[1]: TerminateAwareSupport.this
+                // args[2]: Action1<T> onTerminate
+                final TerminateAwareSupport<?> support = (TerminateAwareSupport<?>)args[1];
                 @SuppressWarnings("unchecked")
-                final Action1<Object> onTerminate = (Action1<Object>)args[1];
+                final Action1<Object> onTerminate = (Action1<Object>)args[2];
                 support._onTerminates.addComponent(onTerminate);
                 return new Action0() {
                     @Override
@@ -83,15 +69,15 @@ public class TerminateAwareSupport<T, F> implements TerminateAware<T> {
                     }};
             }};
                 
-    private static final Func1_N<Object, Action0> CALL_TERMINATE_NOW = 
-        new Func1_N<Object, Action0>() {
+    private static final FuncN<Action0> CALL_TERMINATE_NOW = 
+        new FuncN<Action0>() {
             @SuppressWarnings("unchecked")
             @Override
-            public Action0 call(final Object t,
-                    final Object... args) {
-                // args[0]: TerminateAwareSupport.this
-                // args[1]: Action1<T>
-                ((Action1<Object>)args[1]).call(t);
+            public Action0 call(final Object... args) {
+                // args[0]: T self
+                // args[1]: TerminateAwareSupport.this
+                // args[2]: Action1<T> onTerminate
+                ((Action1<Object>)args[2]).call(args[0]);
                 return Actions.empty();
             }};
             
@@ -107,7 +93,7 @@ public class TerminateAwareSupport<T, F> implements TerminateAware<T> {
                 }
             }};
 
-    private final Func2<TerminateAwareSupport<T,F>, Action1<T>, Action0> _doAddTerminate;
+    private final Func3<T, TerminateAwareSupport<T>, Action1<T>, Action0> _doAddTerminate;
     
     private final COWCompositeSupport<Action1<Object>> _onTerminates = 
             new COWCompositeSupport<>();

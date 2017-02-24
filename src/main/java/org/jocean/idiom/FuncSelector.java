@@ -1,106 +1,94 @@
 package org.jocean.idiom;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.jocean.idiom.rx.Action1_N;
-import org.jocean.idiom.rx.Func1_N;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import rx.functions.ActionN;
 import rx.functions.FuncN;
 
-public class FuncSelector<T> {
+public class FuncSelector {
     
-    public interface SubmitSuccessor<T> extends ActionN {
-        public ActionN submitWhenDestroyed(final Action1_N<T> actionWhenDestroyed);
+    public interface SubmitSuccessor extends ActionN {
+        public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed);
     }
     
-    public interface CallSuccessor<T,R> extends FuncN<R> {
-        public FuncN<R> callWhenDestroyed(final Func1_N<T,R> funcWhenDestroyed);
-    }
-    
-    public FuncSelector(final T data) {
-        this._data = new AtomicReference<T>(data);
+    public interface CallSuccessor<R> extends FuncN<R> {
+        public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed);
     }
     
     public boolean isActive() {
-        return this._data.get() != null;
+        return 1 == updater.get(this);
     }
     
-    public void destroy(final Action1_N<T> actionWhenDestroying, final Object... args) {
-        T data = null;
-        synchronized(this._data) {
-            data = this._data.getAndSet(null);
-            if (null!=data) {
-                this._destroyed = data;
-            }
+    public void destroy(final ActionN actionWhenDestroying, final Object... args) {
+        boolean actived;
+        synchronized(this) {
+            actived = updater.compareAndSet(this, 1, 0);
         }
-        if (null!=data && null!=actionWhenDestroying) {
-            actionWhenDestroying.call(data, args);
+        if (actived && null!=actionWhenDestroying) {
+            actionWhenDestroying.call(args);
         }
     }
     
-    public SubmitSuccessor<T> submitWhenActive(final Action1_N<T> actionWhenActive) {
-        return new SubmitSuccessor<T>() {
+    public SubmitSuccessor submitWhenActive(final ActionN actionWhenActive) {
+        return new SubmitSuccessor() {
             @Override
             public void call(final Object... args) {
-                synchronized(_data) {
-                    final T data = _data.get();
-                    if (null!=data && null!=actionWhenActive) {
-                        actionWhenActive.call(data, args);
+                synchronized(FuncSelector.this) {
+                    if (isActive() && null!=actionWhenActive) {
+                        actionWhenActive.call(args);
                     }
                 }
             }
             
             @Override
-            public ActionN submitWhenDestroyed(final Action1_N<T> actionWhenDestroyed) {
+            public ActionN submitWhenDestroyed(final ActionN actionWhenDestroyed) {
                 return new ActionN() {
                     @Override
                     public void call(final Object... args) {
-                        synchronized(_data) {
-                            final T data = _data.get();
-                            if (null!=data) {
+                        synchronized(FuncSelector.this) {
+                            if (isActive()) {
                                 if (null!=actionWhenActive) {
-                                    actionWhenActive.call(data, args);
+                                    actionWhenActive.call(args);
                                 }
                                 return;
                             }
                         }
                         if (null!=actionWhenDestroyed) {
-                            actionWhenDestroyed.call(_destroyed, args);
+                            actionWhenDestroyed.call(args);
                         }
                     }};
             }};
             
     }
     
-    public <R> CallSuccessor<T,R> callWhenActive(final Func1_N<T, R> funcWhenActive) {
-        return new CallSuccessor<T,R>() {
+    public <R> CallSuccessor<R> callWhenActive(final FuncN<R> funcWhenActive) {
+        return new CallSuccessor<R>() {
 
             @Override
             public R call(final Object... args) {
-                synchronized(_data) {
-                    final T data = _data.get();
-                    return (null!=data) ? funcWhenActive.call(data, args) : null;
+                synchronized(FuncSelector.this) {
+                    return (isActive() && null!=funcWhenActive) ? funcWhenActive.call(args) : null;
                 }
             }
 
             @Override
-            public FuncN<R> callWhenDestroyed(final Func1_N<T,R> funcWhenDestroyed) {
+            public FuncN<R> callWhenDestroyed(final FuncN<R> funcWhenDestroyed) {
                 return new FuncN<R>() {
-
                     @Override
                     public R call(final Object... args) {
-                        synchronized(_data) {
-                            final T data = _data.get();
-                            if (null!=data) {
-                                return funcWhenActive.call(data, args) ;
+                        synchronized(FuncSelector.this) {
+                            if (isActive()) {
+                                return null != funcWhenActive ? funcWhenActive.call(args) : null;
                             }
                         }
-                        return funcWhenDestroyed.call(_destroyed, args);
+                        return funcWhenDestroyed.call(args);
                     }};
             }};
     }
     
-    private final AtomicReference<T> _data;
-    private volatile T _destroyed;
+    private static final AtomicIntegerFieldUpdater<FuncSelector> updater =
+            AtomicIntegerFieldUpdater.newUpdater(FuncSelector.class, "_state");
+
+    @SuppressWarnings("unused")
+    private volatile int _state = 1;
 }

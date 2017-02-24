@@ -12,12 +12,12 @@ public class TerminateAwareSupportTestCase {
 
     @Test
     public final void testTerminateAwareSupport() {
-        final FuncSelector<Object> selector = new FuncSelector<Object>(new Object());
-        final TerminateAwareSupport<Object, Object> support = 
-                new TerminateAwareSupport<Object, Object>(selector);
+        final FuncSelector selector = new FuncSelector();
+        final TerminateAwareSupport<Object> support = 
+                new TerminateAwareSupport<Object>(selector);
         final AtomicBoolean called = new AtomicBoolean(false);
         
-        support.doOnTerminate(new Action0() {
+        support.doOnTerminate(null, new Action0() {
             @Override
             public void call() {
                 called.set(true);
@@ -32,14 +32,14 @@ public class TerminateAwareSupportTestCase {
 
     @Test
     public final void testTerminateAwareSupportAfterDestroyed() {
-        final FuncSelector<Object> selector = new FuncSelector<Object>(new Object());
-        final TerminateAwareSupport<Object, Object> support = 
-                new TerminateAwareSupport<Object, Object>(selector);
+        final FuncSelector selector = new FuncSelector();
+        final TerminateAwareSupport<Object> support = 
+                new TerminateAwareSupport<Object>(selector);
         
         selector.destroy(null);
         final AtomicBoolean called = new AtomicBoolean(false);
         
-        support.doOnTerminate(new Action0() {
+        support.doOnTerminate(null, new Action0() {
             @Override
             public void call() {
                 called.set(true);

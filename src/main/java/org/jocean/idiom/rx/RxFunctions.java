@@ -14,6 +14,7 @@ import rx.functions.Action0;
 import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.functions.Func3;
 import rx.functions.FuncN;
 
 public class RxFunctions {
@@ -68,6 +69,14 @@ public class RxFunctions {
             }};
     }
 
+    public static <T0, T1, T2, R> Func3<T0, T1, T2, R> toFunc3(final FuncN<R> func) {
+        return new Func3<T0, T1, T2, R>() {
+            @Override
+            public R call(final T0 t0, final T1 t1, final T2 t2) {
+                return func.call(t0, t1, t2);
+            }};
+    }
+    
     public static <T, R> Func1_N<T, R> toFunc1_N(final Class<T> cls, final String methodName) {
         final Method method = ReflectUtils.getMethodNamed(cls, methodName);
         if (null!=method) {
