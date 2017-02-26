@@ -12,7 +12,7 @@ public class TerminateAwareSupportTestCase {
 
     @Test
     public final void testTerminateAwareSupport() {
-        final FuncSelector selector = new FuncSelector();
+        final InterfaceSelector selector = new InterfaceSelector();
         final TerminateAwareSupport<Object> support = 
                 new TerminateAwareSupport<Object>(selector);
         final AtomicBoolean called = new AtomicBoolean(false);
@@ -32,7 +32,7 @@ public class TerminateAwareSupportTestCase {
 
     @Test
     public final void testTerminateAwareSupportAfterDestroyed() {
-        final FuncSelector selector = new FuncSelector();
+        final InterfaceSelector selector = new InterfaceSelector();
         final TerminateAwareSupport<Object> support = 
                 new TerminateAwareSupport<Object>(selector);
         
