@@ -14,6 +14,8 @@ public class InterfaceSelector {
         if (null != this._active) {
             this._active = Arrays.copyOf(this._active, this._active.length + 1);
             this._unactived = Arrays.copyOf(this._unactived, this._unactived.length + 1);
+            this._active[this._active.length-1] = actived;
+            this._unactived[this._unactived.length-1] = unactived;
         } else if (null == this._unactived) {
             this._active = new Object[] {actived};
             this._unactived = new Object[] {unactived};
