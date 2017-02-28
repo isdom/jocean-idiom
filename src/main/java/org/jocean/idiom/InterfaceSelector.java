@@ -4,11 +4,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import rx.functions.Action0;
 import rx.functions.ActionN;
 
 public class InterfaceSelector {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(InterfaceSelector.class);
     
     public synchronized <T> T build(final Class<T> cls, final T actived, final T unactived) {
         if (null != this._active) {
@@ -37,10 +45,19 @@ public class InterfaceSelector {
     
     public Object invokeWithIdx(final int idx, final Method method, final Object[] args)
             throws Throwable {
-        synchronized(this) {
-            final Object[] impl = activeUpdater.get(this);
-            if (null != impl) {
-                return method.invoke(impl[idx], args);
+        if (null != activeUpdater.get(this)) {
+            try {
+                activeInvokeCntUpdater.addAndGet(this, 1); // _activeCnt ++
+                final Object[] impl = activeUpdater.get(this); // double check if active state?
+                if (null != impl) {
+                    // means _activeInvokeCnt > 0
+                    return method.invoke(impl[idx], args);
+                }
+            } finally {
+                if (0==activeInvokeCntUpdater.addAndGet(this, -1)) {
+                    // _activeInvokeCnt -- , then equals 0
+                    tryInvokeDelayTask();
+                }
             }
         }
         final Object target = this._unactived[idx];
@@ -51,19 +68,70 @@ public class InterfaceSelector {
         return null != activeUpdater.get(this);
     }
     
-    public void destroy(final ActionN actionWhenDestroying, final Object... args) {
-        Object[] actived;
-        synchronized(this) {
-            actived = activeUpdater.getAndSet(this, null);
+    public void destroyAndSubmit(final ActionN actionWhenDestroying, final Object... args) {
+        final Object[] actived = activeUpdater.getAndSet(this, null);
+        if (null!=actived) {
+            // valid destroy call
+            if (0 == activeInvokeCntUpdater.get(this)) {
+                // means NONE active invoke processing
+                safeInvokeAction(actionWhenDestroying, args);
+                return;
+            } else {
+                // MAYBE _activeCnt > 0
+                delayTaskUpdater.set(this, buildOnetimeAction(actionWhenDestroying,  args));
+                if (0 == activeInvokeCntUpdater.get(this)) {
+                    // active invoke all ended, and MAYBE not see the delay task, so try to invoke
+                    tryInvokeDelayTask();
+                }
+            }
         }
-        if (null!=actived && null!=actionWhenDestroying) {
-            actionWhenDestroying.call(args);
+    }
+
+    private void tryInvokeDelayTask() {
+        final Action0 delayTask = delayTaskUpdater.getAndSet(this, null);
+        if (null != delayTask) {
+            delayTask.call();
+        }
+    }
+
+    private Action0 buildOnetimeAction(final ActionN actionWhenDestroying,
+            final Object[] args) {
+        final AtomicBoolean called = new AtomicBoolean(false);
+        return new Action0() {
+            @Override
+            public void call() {
+                if (called.compareAndSet(false, true)) {
+                    safeInvokeAction(actionWhenDestroying, args);
+                }
+            }};
+    }
+
+    private static void safeInvokeAction(final ActionN action, final Object... args) {
+        if (null!=action) {
+            try {
+                action.call(args);
+            } catch (Exception e) {
+                LOG.warn("exception when invoke action({}), detail: {}",
+                    action, ExceptionUtils.exception2detail(e));
+            }
         }
     }
 
     private static final AtomicReferenceFieldUpdater<InterfaceSelector, Object[]> activeUpdater =
             AtomicReferenceFieldUpdater.newUpdater(InterfaceSelector.class, Object[].class, "_active");
 
-    private volatile Object[] _active = null;
+    private static final AtomicIntegerFieldUpdater<InterfaceSelector> activeInvokeCntUpdater =
+            AtomicIntegerFieldUpdater.newUpdater(InterfaceSelector.class, "_activeInvokeCnt");
+    
+    private static final AtomicReferenceFieldUpdater<InterfaceSelector, Action0> delayTaskUpdater =
+            AtomicReferenceFieldUpdater.newUpdater(InterfaceSelector.class, Action0.class, "_delayTask");
+    
     private Object[] _unactived = null;
+    private volatile Object[] _active = null;
+    
+    @SuppressWarnings("unused")
+    private volatile int _activeInvokeCnt = 0;
+    
+    @SuppressWarnings("unused")
+    private volatile Action0 _delayTask = null;
 }

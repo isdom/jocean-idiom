@@ -36,7 +36,7 @@ public class TerminateAwareSupportTestCase {
         final TerminateAwareSupport<Object> support = 
                 new TerminateAwareSupport<Object>(selector);
         
-        selector.destroy(null);
+        selector.destroyAndSubmit(null);
         final AtomicBoolean called = new AtomicBoolean(false);
         
         support.doOnTerminate(null, new Action0() {

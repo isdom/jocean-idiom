@@ -14,6 +14,12 @@ public class InterfaceSelectorTestCase {
         public int num();
     }
     
+    private static final ActionN SET_TO_TRUE = new ActionN() {
+        @Override
+        public void call(final Object... args) {
+            ((AtomicBoolean)args[0]).set(true);
+        }};
+        
     @Test
     public final void testActiveAndUnactive() {
         final InterfaceSelector selector = new InterfaceSelector();
@@ -31,7 +37,7 @@ public class InterfaceSelectorTestCase {
         
         assertEquals(1, demo.num());
         
-        selector.destroy(null);
+        selector.destroyAndSubmit(null);
         
         assertEquals(0, demo.num());
     }
@@ -51,19 +57,38 @@ public class InterfaceSelectorTestCase {
                 return 0;
             }});
         
-        selector.destroy(null);
+        selector.destroyAndSubmit(null);
         
         assertEquals(0, demo.num());
         
         final AtomicBoolean called = new AtomicBoolean(false);
 
-        selector.destroy(new ActionN() {
-            @Override
-            public void call(final Object... args) {
-                called.set(true);
-            }});
+        selector.destroyAndSubmit(SET_TO_TRUE, called);
         
         assertEquals(0, demo.num());
         assertFalse(called.get());
+    }
+
+    @Test
+    public final void testUnactiveWithinActiveCall() {
+        final InterfaceSelector selector = new InterfaceSelector();
+        
+        final AtomicBoolean called = new AtomicBoolean(false);
+        final Demo demo = selector.build(Demo.class, new Demo() {
+            @Override
+            public int num() {
+                selector.destroyAndSubmit(SET_TO_TRUE, called);
+                assertFalse(called.get());
+                return 1;
+            }}, new Demo() {
+
+            @Override
+            public int num() {
+                return 0;
+            }});
+        
+        assertEquals(1, demo.num());
+        assertTrue(called.get());
+        assertEquals(0, demo.num());
     }
 }
