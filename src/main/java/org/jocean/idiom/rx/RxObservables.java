@@ -243,15 +243,15 @@ public class RxObservables {
     }
 
     public static Transformer<? super Integer, ? extends Integer> retryDelayTo(
-            final int delayBaseInSecond) {
+            final long delayBaseInMS) {
         final Func1<Integer, Observable<? extends Integer>> func1 = 
         new Func1<Integer, Observable<? extends Integer>>() {
             @Override
             public Observable<? extends Integer> call(final Integer retryCount) {
-                final long interval = (long) Math.pow(delayBaseInSecond, retryCount);
-                LOG.info("retryDelayTo: retry for NO.({}) and delay for {} second(s)",
+                final long interval = delayBaseInMS * retryCount;
+                LOG.info("retryDelayTo: retry for NO.({}) and delay for {} MILLISECONDS",
                         retryCount, interval); 
-                return Observable.timer(interval, TimeUnit.SECONDS).map(new Func1<Long, Integer>() {
+                return Observable.timer(interval, TimeUnit.MILLISECONDS).map(new Func1<Long, Integer>() {
                     @Override
                     public Integer call(final Long l) {
                         return retryCount;
