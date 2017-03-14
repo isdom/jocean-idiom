@@ -18,7 +18,7 @@ public class TestUtil {
     public static <T> Observable<? extends T> createObservableByHolder(
             final AtomicBoolean unsubscribed,
             final SubscriberHolder<T> holder) {
-        return Observable.create(new OnSubscribe<T>() {
+        return Observable.unsafeCreate(new OnSubscribe<T>() {
             @Override
             public void call(final Subscriber<? super T> subscriber) {
                 subscriber.add(Subscriptions.create(new Action0() {

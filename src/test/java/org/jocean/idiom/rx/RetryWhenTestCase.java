@@ -25,7 +25,7 @@ public class RetryWhenTestCase {
     };
 
     private static Observable<?> buildAlwaysFailWith(final Throwable throwable) {
-        return Observable.create(new OnSubscribe<Object>() {
+        return Observable.unsafeCreate(new OnSubscribe<Object>() {
             @Override
             public void call(final Subscriber<? super Object> subscriber) {
                 LOG.info("onSubscribe for {}", subscriber);

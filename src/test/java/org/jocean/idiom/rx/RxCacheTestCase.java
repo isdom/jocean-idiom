@@ -16,7 +16,7 @@ public class RxCacheTestCase {
         final SubscriberHolder<String> holder1 = new SubscriberHolder<String>();
         
         final Observable<String> observable1 = 
-            Observable.create(holder1)
+            Observable.unsafeCreate(holder1)
             .cache();
         
         assertEquals(0, holder1.getSubscriberCount());

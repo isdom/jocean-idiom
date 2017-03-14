@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import rx.Observer;
 import rx.Subscription;
+import rx.functions.Action0;
 
 public class ObservableTestCase {
     @Test
@@ -296,5 +297,45 @@ public class ObservableTestCase {
         holder.getAt(0).onError(new RuntimeException());
         
         assertTrue(unsubscribed.get());
+    }
+
+    @Test
+    public final void testOnCompletedTiming() throws InterruptedException {
+        final AtomicBoolean unsubscribed = new AtomicBoolean(false);
+        final SubscriberHolder<String> holder = new SubscriberHolder<String>();
+        
+        final AtomicReference<Subscription> subscriptionRef = new AtomicReference<Subscription>();
+        subscriptionRef.set(
+            TestUtil.createObservableByHolder(unsubscribed, holder)
+            .doOnTerminate(new Action0() {
+                @Override
+                public void call() {
+                    System.out.println("doOnTerminate called.");
+                }} )
+            .doOnCompleted(new Action0() {
+                @Override
+                public void call() {
+                    System.out.println("doOnCompleted called.");
+                }})
+            .subscribe(new Observer<String>() {
+                @Override
+                public void onCompleted() {
+                    System.out.println("subscribe's onCompleted called.");
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    System.out.println("subscribe's onError called with " + e + ".");
+                }
+
+                @Override
+                public void onNext(String t) {
+                    
+                }}));
+        
+        assertEquals(1, holder.getSubscriberCount());
+        
+        holder.getAt(0).onCompleted();
+//        holder.getAt(0).onError(new RuntimeException("hello"));
     }
 }
