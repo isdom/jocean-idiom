@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jocean.idiom.rx.SubscriberHolder;
@@ -427,5 +428,69 @@ public class ObservableTestCase {
         assertFalse(unsubscribeCalled.get());
         subscription.unsubscribe();
         assertTrue(unsubscribeCalled.get());
+    }
+    
+    @Test
+    public final void testDoOnCompletedOrder() throws InterruptedException {
+        final AtomicInteger ordercnt = new AtomicInteger(0);
+        final AtomicReference<Integer> doOnCompletedIdx = new AtomicReference<>();
+        final AtomicReference<Integer> onCompletedIdx = new AtomicReference<>();
+        
+        final SubscriberHolder<String> holder = new SubscriberHolder<String>();
+        
+        Observable.unsafeCreate(holder)
+        .doOnCompleted(new Action0() {
+            @Override
+            public void call() {
+                doOnCompletedIdx.set(ordercnt.getAndIncrement());
+            }})
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onCompleted() {
+                onCompletedIdx.set(ordercnt.getAndIncrement());
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onNext(String t) {
+            }});
+        holder.getAt(0).onCompleted();
+        assertEquals(0, doOnCompletedIdx.get().intValue());
+        assertEquals(1, onCompletedIdx.get().intValue());
+    }
+    
+    @Test
+    public final void testDoAfterTerminateOrder() throws InterruptedException {
+        final AtomicInteger ordercnt = new AtomicInteger(0);
+        final AtomicReference<Integer> doAfterTerminateIdx = new AtomicReference<>();
+        final AtomicReference<Integer> onCompletedIdx = new AtomicReference<>();
+        
+        final SubscriberHolder<String> holder = new SubscriberHolder<String>();
+        
+        Observable.unsafeCreate(holder)
+        .doAfterTerminate(new Action0() {
+            @Override
+            public void call() {
+                doAfterTerminateIdx.set(ordercnt.getAndIncrement());
+            }})
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onCompleted() {
+                onCompletedIdx.set(ordercnt.getAndIncrement());
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onNext(String t) {
+            }});
+        holder.getAt(0).onCompleted();
+        assertEquals(1, doAfterTerminateIdx.get().intValue());
+        assertEquals(0, onCompletedIdx.get().intValue());
     }
 }
