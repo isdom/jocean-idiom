@@ -50,7 +50,7 @@ public class TerminateAwareSupport<T> {
                 (Action1<Object>) onTerminate);
     }
     
-    interface AddTerminate {
+    protected interface AddTerminate {
         public Action0 addAddTerminate(final TerminateAwareSupport<?> support, 
             final Object self, 
             final Action1<Object> onTerminate);
