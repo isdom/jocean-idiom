@@ -1,8 +1,8 @@
 package org.jocean.idiom.os;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,8 +18,8 @@ public interface ProcessFacade {
     public boolean readStdout(final Action1<String> online);
 
     public static class Util {
-        public static ProcessFacade fromProcess(final Process p, final Action0 onEnd) {
-            final BufferedReader in = wrapInReader(p);
+        public static ProcessFacade wrapProcess(final Process p, final Action0 onEnd) {
+            final Reader in = wrapInReader(p);
             final char[] cbuf = new char[256];
             final AtomicReference<Action1<String>> actionRef = new AtomicReference<>();
             final LineBuffer lineBuf = new LineBuffer() {
@@ -53,10 +53,7 @@ public interface ProcessFacade {
                             }
                         }
                         if (!p.isAlive()) {
-                            lineBuf.finish();
-                            if (null != onEnd) {
-                                onEnd.call();
-                            }
+                            cleanup(lineBuf, onEnd);
                             throwOnError(p);
                             // true means process ended
                             return true;
@@ -64,13 +61,7 @@ public interface ProcessFacade {
                         // false means process NOT ended
                         return false;
                     } catch (Exception e) {
-                        try {
-                            lineBuf.finish();
-                        } catch (IOException e1) {
-                        }
-                        if (null != onEnd) {
-                            onEnd.call();
-                        }
+                        cleanup(lineBuf, onEnd);
                         p.destroy();
                         throw new RuntimeException(e);
                     } finally {
@@ -81,8 +72,8 @@ public interface ProcessFacade {
             return facade;
         }
 
-        private static BufferedReader wrapInReader(Process p) {
-            return new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+        private static Reader wrapInReader(Process p) {
+            return new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8);
         }
 
         private static void throwOnError(Process p) throws IOException {
@@ -93,6 +84,16 @@ public interface ProcessFacade {
                 }
             } catch (InterruptedException e) {
                 throw new IOException("InterruptedException waiting for " + p + " to finish.");
+            }
+        }
+
+        private static void cleanup(final LineBuffer lineBuf, final Action0 onEnd) {
+            try {
+                lineBuf.finish();
+            } catch (IOException e) {
+            }
+            if (null != onEnd) {
+                onEnd.call();
             }
         }
     }
