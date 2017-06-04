@@ -16,6 +16,9 @@ public interface ProcessFacade {
     public void shutdown();
 
     public boolean readStdout(final Action1<String> online);
+    
+    // TODO, add onEnded callback 
+    // public void addOnEnd(final Action0 onEnd);
 
     public static class Util {
         public static ProcessFacade wrapProcess(final Process p, final Action0 onEnd) {
