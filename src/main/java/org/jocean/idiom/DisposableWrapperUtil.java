@@ -18,8 +18,8 @@ public class DisposableWrapperUtil {
         };
     }
     
-    public static <E> DisposableWrapper<E> disposeOn(final DisposableWrapper<E> wrapper,
-            final TerminateAware<?> terminateAware) {
+    public static <E> DisposableWrapper<E> disposeOn(final TerminateAware<?> terminateAware,
+            final DisposableWrapper<E> wrapper) {
         terminateAware.doOnTerminate(new Action0() {
             @Override
             public void call() {
@@ -32,7 +32,7 @@ public class DisposableWrapperUtil {
         return new Action1<DisposableWrapper<E>>() {
             @Override
             public void call(final DisposableWrapper<E> wrapper) {
-                disposeOn(wrapper, terminateAware);
+                disposeOn(terminateAware, wrapper);
             }};
     }
 }
