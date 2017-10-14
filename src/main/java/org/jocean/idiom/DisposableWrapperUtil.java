@@ -1,5 +1,7 @@
 package org.jocean.idiom;
 
+import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
 public class DisposableWrapperUtil {
@@ -14,5 +16,23 @@ public class DisposableWrapperUtil {
                 return wrapper.unwrap();
             }
         };
+    }
+    
+    public static <E> DisposableWrapper<E> disposeOn(final DisposableWrapper<E> wrapper,
+            final TerminateAware<?> terminateAware) {
+        terminateAware.doOnTerminate(new Action0() {
+            @Override
+            public void call() {
+                wrapper.dispose();
+            }});
+        return wrapper;
+    }
+    
+    public static <E> Action1<DisposableWrapper<E>> disposeOn(final TerminateAware<?> terminateAware) {
+        return new Action1<DisposableWrapper<E>>() {
+            @Override
+            public void call(final DisposableWrapper<E> wrapper) {
+                disposeOn(wrapper, terminateAware);
+            }};
     }
 }
