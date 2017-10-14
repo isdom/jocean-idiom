@@ -35,4 +35,10 @@ public class DisposableWrapperUtil {
                 disposeOn(terminateAware, wrapper);
             }};
     }
+    
+    public static void dispose(final Object obj) {
+        if (obj instanceof DisposableWrapper) {
+            ((DisposableWrapper<?>)obj).dispose();
+        }
+    }
 }
