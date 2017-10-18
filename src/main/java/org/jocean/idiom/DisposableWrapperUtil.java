@@ -41,4 +41,13 @@ public class DisposableWrapperUtil {
             ((DisposableWrapper<?>)obj).dispose();
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    public static Object unwrap(final Object obj) {
+        if (obj instanceof DisposableWrapper) {
+            return unwrap(((DisposableWrapper<Object>)obj).unwrap());
+        } else {
+            return obj;
+        }
+    }
 }
