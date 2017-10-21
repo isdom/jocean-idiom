@@ -20,11 +20,13 @@ public class DisposableWrapperUtil {
     
     public static <E> DisposableWrapper<E> disposeOn(final TerminateAware<?> terminateAware,
             final DisposableWrapper<E> wrapper) {
-        terminateAware.doOnTerminate(new Action0() {
-            @Override
-            public void call() {
-                wrapper.dispose();
-            }});
+        if (null!=terminateAware) {
+            terminateAware.doOnTerminate(new Action0() {
+                @Override
+                public void call() {
+                    wrapper.dispose();
+                }});
+        }
         return wrapper;
     }
     
