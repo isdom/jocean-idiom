@@ -1,8 +1,10 @@
 package org.jocean.idiom;
 
+import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.subscriptions.Subscriptions;
 
 public class DisposableWrapperUtil {
     private DisposableWrapperUtil() {
@@ -14,6 +16,59 @@ public class DisposableWrapperUtil {
             @Override
             public E call(final DisposableWrapper<E> wrapper) {
                 return wrapper.unwrap();
+            }
+        };
+    }
+    
+    public static <E> DisposableWrapper<E> wrap(final E element, final Action1<E> disposer) {
+        final Subscription subscription = Subscriptions.create(new Action0() {
+            @Override
+            public void call() {
+                if (null != disposer) {
+                    disposer.call(element);
+                }
+            }
+        });
+        return new DisposableWrapper<E>() {
+
+            @Override
+            public int hashCode() {
+                return unwrap().hashCode();
+            }
+
+            @Override
+            public boolean equals(final Object o) {
+                return unwrap().equals(DisposableWrapperUtil.unwrap(o));
+            }
+
+            @Override
+            public E unwrap() {
+                return element;
+            }
+
+            @Override
+            public void dispose() {
+                subscription.unsubscribe();
+            }
+
+            @Override
+            public boolean isDisposed() {
+                return subscription.isUnsubscribed();
+            }
+
+            @Override
+            public String toString() {
+                return "DisposableWrapper[" + unwrap().toString() + "]";
+            }
+        };
+    }
+
+    public static <E> Func1<E, DisposableWrapper<E>> wrap(final Action1<E> disposer,
+            final TerminateAware<?> terminateAware) {
+        return new Func1<E, DisposableWrapper<E>>() {
+            @Override
+            public DisposableWrapper<E> call(final E element) {
+                return disposeOn(terminateAware, wrap(element, disposer));
             }
         };
     }
