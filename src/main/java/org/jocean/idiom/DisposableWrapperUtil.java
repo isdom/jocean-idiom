@@ -20,12 +20,12 @@ public class DisposableWrapperUtil {
         };
     }
     
-    public static <E> DisposableWrapper<E> wrap(final E element, final Action1<E> disposer) {
+    public static <E> DisposableWrapper<E> wrap(final E unwrap, final Action1<E> disposer) {
         final Subscription subscription = Subscriptions.create(new Action0() {
             @Override
             public void call() {
                 if (null != disposer) {
-                    disposer.call(element);
+                    disposer.call(unwrap);
                 }
             }
         });
@@ -43,7 +43,7 @@ public class DisposableWrapperUtil {
 
             @Override
             public E unwrap() {
-                return element;
+                return unwrap;
             }
 
             @Override
@@ -67,10 +67,44 @@ public class DisposableWrapperUtil {
             final TerminateAware<?> terminateAware) {
         return new Func1<E, DisposableWrapper<E>>() {
             @Override
-            public DisposableWrapper<E> call(final E element) {
-                return disposeOn(terminateAware, wrap(element, disposer));
+            public DisposableWrapper<E> call(final E unwrap) {
+                return disposeOn(terminateAware, wrap(unwrap, disposer));
             }
         };
+    }
+    
+    public static <E> DisposableWrapper<E> wrap(final E unwrap, final DisposableWrapper<?> org) {
+        return new DisposableWrapper<E>() {
+
+            @Override
+            public int hashCode() {
+                return unwrap().hashCode();
+            }
+
+            @Override
+            public boolean equals(final Object o) {
+                return unwrap().equals(DisposableWrapperUtil.unwrap(o));
+            }
+            
+            @Override
+            public E unwrap() {
+                return unwrap;
+            }
+
+            @Override
+            public void dispose() {
+                org.dispose();
+            }
+
+            @Override
+            public boolean isDisposed() {
+                return org.isDisposed();
+            }
+            
+            @Override
+            public String toString() {
+                return "DisposableWrapper[" + unwrap.toString() + "]";
+            }};
     }
     
     public static <E> DisposableWrapper<E> disposeOn(final TerminateAware<?> terminateAware,
