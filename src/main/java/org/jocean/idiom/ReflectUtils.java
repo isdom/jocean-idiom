@@ -140,6 +140,23 @@ public class ReflectUtils {
         return	fields;
     }
     
+    public static Field getFieldNamedDeep(final Class<?> cls, final String fieldName) {
+        Class<?> itr = cls;
+        while ( (null != itr) && !itr.equals(Object.class)) {
+            try {
+                final Field field = itr.getDeclaredField(fieldName);
+                if (null != field) {
+                    return field;
+                }
+            } catch (Exception e) {
+                // just ignore
+            }
+            itr = itr.getSuperclass();
+        }
+        
+        return  null;
+    }
+    
     public static Field[] getAnnotationFieldsOf(
 	        final Class<?> cls, 
 			final Class<? extends Annotation> annotationClass) {
