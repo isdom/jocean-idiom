@@ -19,38 +19,59 @@ public class Proxys {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T build(final Class<T> intf, final Object delegate) {
+    public static <T> T delegate(final Class<T> intf, final Object... delegates) {
         return (T) Proxy.newProxyInstance(
-                delegate.getClass().getClassLoader(), new Class<?>[]{intf}, new Handler(delegate));
+            Thread.currentThread().getContextClassLoader(), 
+            new Class<?>[]{intf}, new Handler(delegates));
     }
     
-    private final static SimpleCache<String, Method> METHODS = new SimpleCache<>(new Func1<String, Method>() {
+    private final static SimpleCache<String, Pair<Integer,Method>> METHODS = new SimpleCache<>(new Func1<String, Pair<Integer,Method>>() {
         @Override
-        public Method call(final String clazzAndMethod) {
-            final String[] ss = clazzAndMethod.split(":");
+        public Pair<Integer,Method> call(final String classesAndMethod) {
+            final String[] ss = classesAndMethod.split(":");
+            final String[] classes = ss[0].split("/");
             try {
-                final Class<?> clazz = Class.forName(ss[0]);
-                return ReflectUtils.getMethodNamed(clazz, ss[1]);
+                for (int idx = 0; idx < classes.length; idx++) {
+                    final Class<?> clazz = Class.forName(classes[idx]);
+                    final Method method = ReflectUtils.getMethodNamed(clazz, ss[1]);
+                    if (null != method) {
+                        return Pair.of(idx, method);
+                    }
+                }
             } catch (ClassNotFoundException e) {
                 LOG.warn("exception when Class.forName({}), detail: {}", 
                         ss[0], ExceptionUtils.exception2detail(e));
-                return null;
             }
+            return null;
         }});
     
+    private static String classesNameOf(final Object[] delegates) {
+        final StringBuilder sb = new StringBuilder();
+        String splitter = "";
+        for (Object o : delegates) {
+            sb.append(splitter);
+            sb.append(o.getClass().getName());
+            splitter = "/";
+        }
+        return sb.toString();
+    }
+
     private static class Handler implements InvocationHandler {
 
-        public Handler(final Object delegate) {
-            this._delegate = delegate;
+        public Handler(final Object... delegates) {
+            this._delegates = delegates;
+            this._classes = classesNameOf(delegates);
         }
 
         public Object invoke(final Object obj, final Method method, final Object[] args)
                 throws Throwable {
-            final String clazzAndMethod = this._delegate.getClass().getName() + ":" + method.getName();
-            final Method implMethod = METHODS.get(clazzAndMethod);
-            if (null != implMethod) {
-                final Object ret = implMethod.invoke(this._delegate, args);
-                if (implMethod.getReturnType().equals(method.getReturnType())) {
+            final String classesAndMethod = this._classes + ":" + method.getName();
+            final Pair<Integer,Method> idxAndMethod = METHODS.get(classesAndMethod);
+            if (null != idxAndMethod) {
+                final Object delegate = this._delegates[idxAndMethod.first];
+                final Method delegateMethod = idxAndMethod.second;
+                final Object ret = delegateMethod.invoke(delegate, args);
+                if (delegateMethod.getReturnType().equals(method.getReturnType())) {
                     return ret;
                 } else if (method.getReturnType().isInstance(obj)) {
                     return obj;
@@ -59,7 +80,8 @@ public class Proxys {
             return null;
         }
         
-        private final Object _delegate;
+        private final Object[] _delegates;
+        private final String _classes;
     }
 
 }
