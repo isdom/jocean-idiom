@@ -71,10 +71,17 @@ public class Proxys {
                 final Object delegate = this._delegates[idxAndMethod.first];
                 final Method delegateMethod = idxAndMethod.second;
                 final Object ret = delegateMethod.invoke(delegate, args);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("delegateMethod's return type: {}, and Method's return type: {}", 
+                            delegateMethod.getReturnType(), method.getReturnType());
+                }
                 if (delegateMethod.getReturnType().equals(method.getReturnType())) {
                     return ret;
                 } else if (method.getReturnType().isInstance(obj)) {
                     return obj;
+                } else {
+                    LOG.warn("delegateMethod's return type: {}, and Method's return type: {}, invoke will return null", 
+                            delegateMethod.getReturnType(), method.getReturnType());
                 }
             }
             return null;
