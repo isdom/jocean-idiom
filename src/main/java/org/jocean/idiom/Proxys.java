@@ -72,7 +72,7 @@ public class Proxys {
                 final Method delegateMethod = idxAndMethod.second;
                 final Object ret = delegateMethod.invoke(delegate, args);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("ret is {}, delegateMethod: {}, and Method: {}", 
+                    LOG.debug("invoke ret: {}\r\n\tdelegateMethod: {}\r\n\tand Method: {}", 
                             ret, delegateMethod, method);
                 }
                 if (null != ret && (ret.getClass().equals(method.getReturnType()))) {
@@ -80,7 +80,7 @@ public class Proxys {
                 } else if (method.getReturnType().isInstance(obj)) {
                     return obj;
                 } else {
-                    LOG.warn("ret {}/delegateMethod: {}/Method: {}, and invoke will return null", 
+                    LOG.warn("invoke ret: {}\r\n\tdelegateMethod: {}\r\n\tMethod: {}\r\n\tand invoke will return null", 
                             ret, delegateMethod, method);
                 }
             }
