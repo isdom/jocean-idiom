@@ -72,8 +72,8 @@ public class Proxys {
                 final Method delegateMethod = idxAndMethod.second;
                 final Object ret = delegateMethod.invoke(delegate, args);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("delegateMethod's return type: {}, and Method's return type: {}", 
-                            delegateMethod.getReturnType(), method.getReturnType());
+                    LOG.debug("ret's type is {}, delegateMethod's return type: {}, and Method's return type: {}", 
+                            null != ret ? ret.getClass() : "<null>", delegateMethod.getReturnType(), method.getReturnType());
                 }
                 if (delegateMethod.getReturnType().equals(method.getReturnType())) {
                     return ret;
