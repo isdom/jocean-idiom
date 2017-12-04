@@ -84,6 +84,24 @@ public class Proxys {
 
         public Object invoke(final Object obj, final Method method, final Object[] args)
                 throws Throwable {
+            //   An invocation of the hashCode, equals, or toString methods
+            // declared in java.lang.Object on a proxy instance will be 
+            // encoded and dispatched to the invocation handler's invoke
+            // method in the same manner as interface method invocations are
+            // encoded and dispatched, as described above. The declaring 
+            // class of the Method object passed to invoke will be
+            // java.lang.Object. Other public methods of a proxy instance
+            // inherited from java.lang.Object are not overridden by a proxy
+            // class, so invocations of those methods behave like they do
+            // for instances of java.lang.Object.
+            if (method.getName().equals("hashCode")) {
+                return this._delegates[0].hashCode();
+            } else if (method.getName().equals("equals")) {
+                return (obj == args[0]);
+            } else if (method.getName().equals("toString")) {
+                return this._delegates[0].toString();
+            }
+            
             final String classesAndMethod = this._classes + ":" + method.getName();
             final Pair<Integer,Method> idxAndMethod = METHODS.get(classesAndMethod);
             if (null != idxAndMethod) {
@@ -91,10 +109,6 @@ public class Proxys {
                 final RET retmode = this._rets[idxAndMethod.first];
                 final Method delegateMethod = idxAndMethod.second;
                 final Object ret = delegateMethod.invoke(delegate, args);
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.debug("invoke ret: {}\r\n\tdelegateMethod: {}\r\n\tand Method: {}", 
-//                            ret, delegateMethod, method);
-//                }
                 if (retmode.equals(RET.PASSTHROUGH)) {
                     return ret;
                 } else if (retmode.equals(RET.SELF)) {
