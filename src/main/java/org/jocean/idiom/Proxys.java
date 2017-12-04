@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import rx.functions.Func1;
 
 public class Proxys {
-    enum RET {
+    public static enum RET {
         PASSTHROUGH,
         SELF
     }
