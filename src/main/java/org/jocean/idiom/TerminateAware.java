@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
-public interface TerminateAware<T> {
+public interface TerminateAware<T> extends Terminable {
     
     public Action1<Action0> onTerminate();
     public Action1<Action1<T>> onTerminateOf();
