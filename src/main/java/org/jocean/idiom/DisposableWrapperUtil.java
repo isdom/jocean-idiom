@@ -64,11 +64,11 @@ public class DisposableWrapperUtil {
     }
 
     public static <E> Func1<E, DisposableWrapper<E>> wrap(final Action1<E> disposer,
-            final TerminateAware<?> terminateAware) {
+            final Terminable terminable) {
         return new Func1<E, DisposableWrapper<E>>() {
             @Override
             public DisposableWrapper<E> call(final E unwrap) {
-                return disposeOn(terminateAware, wrap(unwrap, disposer));
+                return disposeOn(terminable, wrap(unwrap, disposer));
             }
         };
     }
@@ -107,10 +107,10 @@ public class DisposableWrapperUtil {
             }};
     }
     
-    public static <E> DisposableWrapper<E> disposeOn(final TerminateAware<?> terminateAware,
+    public static <E> DisposableWrapper<E> disposeOn(final Terminable terminable,
             final DisposableWrapper<E> wrapper) {
-        if (null!=terminateAware) {
-            terminateAware.doOnTerminate(new Action0() {
+        if (null!=terminable) {
+            terminable.doOnTerminate(new Action0() {
                 @Override
                 public void call() {
                     wrapper.dispose();
@@ -119,11 +119,11 @@ public class DisposableWrapperUtil {
         return wrapper;
     }
     
-    public static <E> Action1<DisposableWrapper<E>> disposeOn(final TerminateAware<?> terminateAware) {
+    public static <E> Action1<DisposableWrapper<E>> disposeOn(final Terminable terminable) {
         return new Action1<DisposableWrapper<E>>() {
             @Override
             public void call(final DisposableWrapper<E> wrapper) {
-                disposeOn(terminateAware, wrapper);
+                disposeOn(terminable, wrapper);
             }};
     }
     
