@@ -127,6 +127,16 @@ public class DisposableWrapperUtil {
             }};
     }
     
+    public static Action1<Object> disposeOnForAny(final Terminable terminable) {
+        return new Action1<Object>() {
+            @Override
+            public void call(final Object obj) {
+                if (obj instanceof DisposableWrapper) {
+                    disposeOn(terminable, (DisposableWrapper<?>)obj);
+                }
+            }};
+    }
+    
     public static void dispose(final Object obj) {
         if (obj instanceof DisposableWrapper) {
             ((DisposableWrapper<?>)obj).dispose();
