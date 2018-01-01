@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +32,14 @@ public class Proxys {
         Arrays.fill(rets, RET.PASSTHROUGH);
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(), 
-            new Class<?>[]{intf}, new Handler(delegates, rets));
+            new Class<?>[]{intf}, new DelegateHandler(delegates, rets));
     }
     
     @SuppressWarnings("unchecked")
     public static <T> T delegate(final Class<T> intf, final Object[] delegates, final RET[] rets) {
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(), 
-            new Class<?>[]{intf}, new Handler(delegates, rets));
+            new Class<?>[]{intf}, new DelegateHandler(delegates, rets));
     }
     
     private final static SimpleCache<String, Pair<Integer,Method>> METHODS = new SimpleCache<>(new Func1<String, Pair<Integer,Method>>() {
@@ -71,9 +73,9 @@ public class Proxys {
         return sb.toString();
     }
 
-    private static class Handler implements InvocationHandler {
+    private static class DelegateHandler implements InvocationHandler {
 
-        public Handler(final Object[] delegates, final RET[] rets) {
+        public DelegateHandler(final Object[] delegates, final RET[] rets) {
             if (delegates.length != rets.length) {
                 throw new RuntimeException("delegates and rets's size NOT match!");
             }
@@ -125,4 +127,65 @@ public class Proxys {
         private final String _classes;
     }
 
+    public static interface MixinBuilder {
+        public <T> MixinBuilder mix(final Class<T> type, final T obj);
+        public <T> T build();
+    }
+    
+    public static MixinBuilder mixin() {
+        final Map<Class<?>, Object> _mixin = new HashMap<>();
+        return new MixinBuilder() {
+
+            @Override
+            public <T> MixinBuilder mix(final Class<T> type, final T target) {
+                _mixin.put(type, target);
+                return this;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T build() {
+                return (T) Proxy.newProxyInstance(
+                        Thread.currentThread().getContextClassLoader(), 
+                        _mixin.keySet().toArray(new Class<?>[0]), 
+                        new MixinHandler(_mixin));
+            }};
+    }
+    
+    private static class MixinHandler implements InvocationHandler {
+
+        public MixinHandler(final Map<Class<?>, Object> mixin) {
+            this._mixin = mixin;
+        }
+
+        public Object invoke(final Object obj, final Method method, final Object[] args)
+                throws Throwable {
+            //   An invocation of the hashCode, equals, or toString methods
+            // declared in java.lang.Object on a proxy instance will be 
+            // encoded and dispatched to the invocation handler's invoke
+            // method in the same manner as interface method invocations are
+            // encoded and dispatched, as described above. The declaring 
+            // class of the Method object passed to invoke will be
+            // java.lang.Object. Other public methods of a proxy instance
+            // inherited from java.lang.Object are not overridden by a proxy
+            // class, so invocations of those methods behave like they do
+            // for instances of java.lang.Object.
+            if (method.getName().equals("hashCode")) {
+                return obj.hashCode();
+            } else if (method.getName().equals("equals")) {
+                return (obj == args[0]);
+            } else if (method.getName().equals("toString")) {
+                return obj.toString();
+            }
+            
+            final Object target = this._mixin.get(method.getDeclaringClass());
+            if (null != target) {
+                return method.invoke(target, args);
+            } else {
+                throw new RuntimeException("invalid method(" + method +") invoke");
+            }
+        }
+        
+        private final Map<Class<?>, Object> _mixin;
+    }
 }

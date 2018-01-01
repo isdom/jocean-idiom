@@ -2,6 +2,8 @@ package org.jocean.idiom;
 
 import static org.junit.Assert.*;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 
 public class ProxysTestCase {
@@ -69,5 +71,38 @@ public class ProxysTestCase {
         
         assertEquals(1L, b._b);
         assertEquals(1L, ab.getB());
+    }
+
+    public interface IB {
+        public int funcB();
+    }
+    
+    @Test
+    public final void testMixin() {
+        final AtomicInteger _a = new AtomicInteger(0);
+        final IA ia = Proxys.mixin()
+                .mix(IA.class, new IA() {
+                    @Override
+                    public IA setA(int a) {
+                        System.out.println("IA's setA");
+                        _a.set(a);
+                        return null;
+                    }
+        
+                    @Override
+                    public int getA() {
+                        System.out.println("IA's getA");
+                        return _a.get();
+                    }})
+                .mix(IB.class, new IB() {
+
+                    @Override
+                    public int funcB() {
+                        System.out.println("IB's funcB");
+                        return _a.get();
+                    }})
+                .build();
+        ia.setA(1000);
+        assertEquals(1000, ((IB)ia).funcB());
     }
 }
