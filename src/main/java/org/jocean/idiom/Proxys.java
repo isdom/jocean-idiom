@@ -171,11 +171,11 @@ public class Proxys {
             // class, so invocations of those methods behave like they do
             // for instances of java.lang.Object.
             if (method.getName().equals("hashCode")) {
-                return obj.hashCode();
+                return this._mixin.hashCode();
             } else if (method.getName().equals("equals")) {
                 return (obj == args[0]);
             } else if (method.getName().equals("toString")) {
-                return obj.toString();
+                return this._mixin.toString();
             }
             
             final Object target = this._mixin.get(method.getDeclaringClass());
