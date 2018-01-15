@@ -5,6 +5,7 @@ package org.jocean.idiom;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -242,6 +243,22 @@ public class ReflectUtils {
         } catch (Exception e) {
             LOG.warn("exception when getDeclaredMethod for {}/{}, detail:{}",
                     cls, methodName, ExceptionUtils.exception2detail(e));
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(final Class<T> type) {
+        final Constructor<?>[] constructors = type.getDeclaredConstructors();
+        for (Constructor<?> c : constructors) {
+            if (c.getParameterTypes().length == 0) {
+                c.setAccessible(true);
+                try {
+                    return (T) c.newInstance();
+                } catch (Exception e) {
+                    LOG.warn("exception when invoke ({}).newInstance, detail: {}", c, ExceptionUtils.exception2detail(e));
+                }
+            }
         }
         return null;
     }
