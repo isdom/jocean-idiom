@@ -18,11 +18,25 @@ import rx.functions.Func3;
 import rx.functions.FuncN;
 
 public class RxFunctions {
-    private static final Logger LOG = 
+    private static final Logger LOG =
             LoggerFactory.getLogger(RxFunctions.class);
-    
+
     private RxFunctions() {
         throw new IllegalStateException("No instances!");
+    }
+
+    public static <T> Transformer<T, T> transformBy(final Observable<? extends Transformer<T, T>> provider) {
+        return new Transformer<T, T>() {
+            @Override
+            public Observable<T> call(final Observable<T> source) {
+                return provider.flatMap(new Func1<Transformer<T, T>, Observable<T>>() {
+                            @Override
+                            public Observable<T> call(final Transformer<T, T> trans) {
+                                return source.compose(trans);
+                            }
+                        }).onErrorResumeNext(source);
+            }
+        };
     }
 
     public static <R> FuncN<R> fromConstant(final R r) {
@@ -32,7 +46,7 @@ public class RxFunctions {
                 return r;
             }};
     }
-    
+
     public static <T> Transformer<T, T> countDownOnUnsubscribe(final CountDownLatch latch) {
         return new Transformer<T,T>() {
             @Override
@@ -76,7 +90,7 @@ public class RxFunctions {
                 return func.call(t0, t1, t2);
             }};
     }
-    
+
     public static <T, R> Func1_N<T, R> toFunc1_N(final Class<T> cls, final String methodName) {
         final Method method = ReflectUtils.getMethodNamed(cls, methodName);
         if (null!=method) {
@@ -86,7 +100,7 @@ public class RxFunctions {
                 public R call(final T obj, final Object... args) {
                     try {
                         return (R)method.invoke(obj, args);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LOG.warn("exception when invoke {}.{}, detail: {}",
                                 cls, method, ExceptionUtils.exception2detail(e));
                         return null;
