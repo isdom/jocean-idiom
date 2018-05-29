@@ -30,11 +30,21 @@ public class RxFunctions {
             @Override
             public Observable<T> call(final Observable<T> source) {
                 return provider.flatMap(new Func1<Transformer<T, T>, Observable<T>>() {
-                            @Override
-                            public Observable<T> call(final Transformer<T, T> trans) {
-                                return source.compose(trans);
-                            }
-                        }).onErrorResumeNext(source);
+                    @Override
+                    public Observable<T> call(final Transformer<T, T> trans) {
+                        return source.compose(trans);
+                    }
+                }, new Func1<Throwable, Observable<T>>() {
+                    @Override
+                    public Observable<T> call(final Throwable e) {
+                        return source;
+                    }
+                }, new Func0<Observable<T>>() {
+                    @Override
+                    public Observable<T> call() {
+                        return Observable.empty();
+                    }
+                });
             }
         };
     }
