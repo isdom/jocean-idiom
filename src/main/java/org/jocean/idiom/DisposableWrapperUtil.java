@@ -125,7 +125,7 @@ public class DisposableWrapperUtil {
                 public void call() {
                     wrapper.dispose();
                 }});
-            wrapper.doOnDisposed(undo);
+//            wrapper.doOnDisposed(undo);
         }
         return wrapper;
     }
