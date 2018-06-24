@@ -1,16 +1,16 @@
 package org.jocean.idiom;
 
-import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
 public class DisposableWrapperUtil {
     private DisposableWrapperUtil() {
         throw new IllegalStateException("No instances!");
     }
-    
+
     public static <E> Func1<DisposableWrapper<E>, E> unwrap() {
         return new Func1<DisposableWrapper<E>, E>() {
             @Override
@@ -19,16 +19,16 @@ public class DisposableWrapperUtil {
             }
         };
     }
-    
+
     public static <E> DisposableWrapper<E> wrap(final E unwrap, final Action1<E> disposer) {
-        final Subscription subscription = Subscriptions.create(new Action0() {
+        final CompositeSubscription subscription = new CompositeSubscription(Subscriptions.create(new Action0() {
             @Override
             public void call() {
                 if (null != disposer) {
                     disposer.call(unwrap);
                 }
             }
-        });
+        }));
         return new DisposableWrapper<E>() {
 
             @Override
@@ -57,6 +57,11 @@ public class DisposableWrapperUtil {
             }
 
             @Override
+            public void doOnDisposed(final Action0 action) {
+                subscription.add(Subscriptions.create(action));
+            }
+
+            @Override
             public String toString() {
                 return "DisposableWrapper[" + unwrap().toString() + "]";
             }
@@ -72,7 +77,7 @@ public class DisposableWrapperUtil {
             }
         };
     }
-    
+
     public static <E> DisposableWrapper<E> wrap(final E unwrap, final DisposableWrapper<?> org) {
         return new DisposableWrapper<E>() {
 
@@ -85,7 +90,7 @@ public class DisposableWrapperUtil {
             public boolean equals(final Object o) {
                 return unwrap().equals(DisposableWrapperUtil.unwrap(o));
             }
-            
+
             @Override
             public E unwrap() {
                 return unwrap;
@@ -100,13 +105,18 @@ public class DisposableWrapperUtil {
             public boolean isDisposed() {
                 return org.isDisposed();
             }
-            
+
+            @Override
+            public void doOnDisposed(final Action0 action) {
+                org.doOnDisposed(action);
+            }
+
             @Override
             public String toString() {
                 return "DisposableWrapper[" + unwrap.toString() + "]";
             }};
     }
-    
+
     public static <E> DisposableWrapper<E> disposeOn(final Terminable terminable,
             final DisposableWrapper<E> wrapper) {
         if (null!=terminable) {
@@ -118,7 +128,7 @@ public class DisposableWrapperUtil {
         }
         return wrapper;
     }
-    
+
     public static <E> Action1<DisposableWrapper<E>> disposeOn(final Terminable terminable) {
         return new Action1<DisposableWrapper<E>>() {
             @Override
@@ -126,7 +136,7 @@ public class DisposableWrapperUtil {
                 disposeOn(terminable, wrapper);
             }};
     }
-    
+
     public static Action1<Object> disposeOnForAny(final Terminable terminable) {
         return new Action1<Object>() {
             @Override
@@ -136,13 +146,13 @@ public class DisposableWrapperUtil {
                 }
             }};
     }
-    
+
     public static void dispose(final Object obj) {
         if (obj instanceof DisposableWrapper) {
             ((DisposableWrapper<?>)obj).dispose();
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Object unwrap(final Object obj) {
         if (obj instanceof DisposableWrapper) {
