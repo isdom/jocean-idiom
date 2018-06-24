@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.jocean.idiom;
 
@@ -19,14 +19,14 @@ import rx.functions.Action1;
  */
 public class COWCompositeSupport<T> {
 
-    private static final Logger LOG = 
+    private static final Logger LOG =
         	LoggerFactory.getLogger(COWCompositeSupport.class);
-    
+
     public boolean isEmpty() {
     	final List<T> current = this._components.get();
     	return (null == current) || current.isEmpty();
     }
-    
+
 	public boolean addComponent(final T component) {
 		synchronized( this._components) {
 			final List<T> current = _components.get();
@@ -42,18 +42,18 @@ public class COWCompositeSupport<T> {
 			newComponents.add(component);
 			_components.set(newComponents);
 		}
-		
+
 		return	true;
 	}
-	
+
 	public void removeComponent(final T component) {
 		synchronized( this._components) {
 			final List<T> current = _components.get();
-			if ( null != current 
+			if ( null != current
 				&& current.contains(component)) {
 				final List<T> newComponents = new ArrayList<T>(current);
 				newComponents.remove(component);
-				this._components.set( 
+				this._components.set(
 					!newComponents.isEmpty() ? newComponents : null);
 			}
 		}
@@ -67,14 +67,14 @@ public class COWCompositeSupport<T> {
     			try {
     				visitor.call( component );
     			}
-    			catch (Exception e) {
+    			catch (final Exception e) {
     				LOG.error("exception when call COWCompositeSupport.foreachComponent, detail:{}",
     						ExceptionUtils.exception2detail(e));
     			}
     		}
     	}
 	}
-	
+
     public void foreachComponent(final Action1_N<T> visitor, final Object...args) {
         final List<T> current = this._components.get();
         if ( null != current ) {
@@ -83,14 +83,14 @@ public class COWCompositeSupport<T> {
                 try {
                     visitor.call(component, args);
                 }
-                catch (Exception e) {
+                catch (final Exception e) {
                     LOG.error("exception when call COWCompositeSupport.foreachComponent, detail:{}",
                             ExceptionUtils.exception2detail(e));
                 }
             }
         }
     }
-    
+
 	public void clear() {
 		synchronized( this._components) {
 			final List<T> old = _components.getAndSet(null);
@@ -99,7 +99,12 @@ public class COWCompositeSupport<T> {
 			}
 		}
 	}
-	
-    private final AtomicReference<List<T>> 
+
+	public int componentCount() {
+        final List<T> current = this._components.get();
+        return null != current ? current.size() : 0;
+	}
+
+    private final AtomicReference<List<T>>
 		_components = new AtomicReference<>(null);
 }

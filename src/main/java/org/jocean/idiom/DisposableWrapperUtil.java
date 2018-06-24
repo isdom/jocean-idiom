@@ -120,11 +120,12 @@ public class DisposableWrapperUtil {
     public static <E> DisposableWrapper<E> disposeOn(final Terminable terminable,
             final DisposableWrapper<E> wrapper) {
         if (null!=terminable) {
-            terminable.doOnTerminate(new Action0() {
+            final Action0 undo = terminable.doOnTerminate(new Action0() {
                 @Override
                 public void call() {
                     wrapper.dispose();
                 }});
+            wrapper.doOnDisposed(undo);
         }
         return wrapper;
     }
