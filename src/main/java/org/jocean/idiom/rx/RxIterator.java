@@ -8,5 +8,5 @@ public interface RxIterator<E> {
 
     public Observable<? extends RxIterator<E>> next();
 
-    public Observable<? extends E> payload();
+    public E element();
 }
