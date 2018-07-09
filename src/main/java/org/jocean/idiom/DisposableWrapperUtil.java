@@ -11,10 +11,10 @@ public class DisposableWrapperUtil {
         throw new IllegalStateException("No instances!");
     }
 
-    public static <E> Func1<DisposableWrapper<E>, E> unwrap() {
-        return new Func1<DisposableWrapper<E>, E>() {
+    public static <E> Func1<DisposableWrapper<? extends E>, E> unwrap() {
+        return new Func1<DisposableWrapper<? extends E>, E>() {
             @Override
-            public E call(final DisposableWrapper<E> wrapper) {
+            public E call(final DisposableWrapper<? extends E> wrapper) {
                 return wrapper.unwrap();
             }
         };
