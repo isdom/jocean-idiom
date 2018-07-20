@@ -6,7 +6,7 @@ import rx.functions.Func1;
 
 public class StepableUtil {
 
-    final static private Transformer<Stepable<Observable<Object>>, Object> ROLLOUT_TO_ELEMENT =
+    final static private Transformer<Stepable<Observable<Object>>, Object> AUTOSTEP_TO_ELEMENT =
             new Transformer<Stepable<Observable<Object>>, Object>() {
                 @Override
                 public Observable<Object> call(final Observable<Stepable<Observable<Object>>> org) {
@@ -26,7 +26,7 @@ public class StepableUtil {
         }
 
         @SuppressWarnings("unchecked")
-        public static <S extends Stepable<Observable<? extends E>>, E> Transformer<S, E> rollout2element() {
-            return (Transformer<S, E>)ROLLOUT_TO_ELEMENT;
+        public static <S extends Stepable<Observable<? extends E>>, E> Transformer<S, E> autostep2element() {
+            return (Transformer<S, E>)AUTOSTEP_TO_ELEMENT;
         }
 }
