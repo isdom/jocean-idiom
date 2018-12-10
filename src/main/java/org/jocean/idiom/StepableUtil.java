@@ -46,4 +46,24 @@ public class StepableUtil {
             }
         };
     }
+
+    public static <S extends Stepable<Iterable<? extends E>>, E> Transformer<S, E> autostep2element2() {
+//      return (Transformer<S, E>)AUTOSTEP_TO_ELEMENT;
+        final Func1<S, Observable<? extends E>> s2e = new Func1<S, Observable<? extends E>>() {
+            @Override
+            public Observable<? extends E> call(final S slice) {
+                try {
+                    return Observable.from(slice.element());
+                } finally {
+                    slice.step();
+                }
+            }
+        };
+        return new Transformer<S, E>() {
+            @Override
+            public Observable<E> call(final Observable<S> org) {
+                return org.flatMap(s2e);
+            }
+        };
+    }
 }
