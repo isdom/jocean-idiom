@@ -11,22 +11,22 @@ import rx.functions.Actions;
  * @author isdom
  *
  */
-public class TerminableUtil {
+public class EndableUtil {
 
-    private TerminableUtil() {
+    private EndableUtil() {
         throw new IllegalStateException("No instances!");
     }
 
-    public static Terminable nop() {
-        return new Terminable() {
+    public static Endable nop() {
+        return new Endable() {
 
             @Override
-            public Action1<Action0> onTerminate() {
+            public Action1<Action0> onEnd() {
                 return Actions.empty();
             }
 
             @Override
-            public Action0 doOnTerminate(final Action0 onTerminate) {
+            public Action0 doOnEnd(final Action0 onTerminate) {
                 return Actions.empty();
             }};
     }

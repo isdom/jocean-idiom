@@ -13,11 +13,11 @@ public class TerminateAwareSupportTestCase {
     @Test
     public final void testTerminateAwareSupport() {
         final InterfaceSelector selector = new InterfaceSelector();
-        final TerminateAwareSupport<Object> support = 
-                new TerminateAwareSupport<Object>(selector);
+        final EndAwareSupport<Object> support = 
+                new EndAwareSupport<Object>(selector);
         final AtomicBoolean called = new AtomicBoolean(false);
         
-        support.doOnTerminate(null, new Action0() {
+        support.doOnEnd(null, new Action0() {
             @Override
             public void call() {
                 called.set(true);
@@ -25,7 +25,7 @@ public class TerminateAwareSupportTestCase {
         
         assertFalse(called.get());
         
-        support.fireAllTerminates(null);
+        support.fireAllActions(null);
         
         assertTrue(called.get());
     }
@@ -33,13 +33,13 @@ public class TerminateAwareSupportTestCase {
     @Test
     public final void testTerminateAwareSupportAfterDestroyed() {
         final InterfaceSelector selector = new InterfaceSelector();
-        final TerminateAwareSupport<Object> support = 
-                new TerminateAwareSupport<Object>(selector);
+        final EndAwareSupport<Object> support = 
+                new EndAwareSupport<Object>(selector);
         
         selector.destroyAndSubmit(null);
         final AtomicBoolean called = new AtomicBoolean(false);
         
-        support.doOnTerminate(null, new Action0() {
+        support.doOnEnd(null, new Action0() {
             @Override
             public void call() {
                 called.set(true);
