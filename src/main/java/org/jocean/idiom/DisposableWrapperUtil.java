@@ -116,10 +116,9 @@ public class DisposableWrapperUtil {
             }};
     }
 
-    public static <E> DisposableWrapper<E> disposeOn(final Endable terminable,
-            final DisposableWrapper<E> wrapper) {
-        if (null!=terminable) {
-            final Action0 undo = terminable.doOnEnd(new Action0() {
+    public static <E> DisposableWrapper<E> disposeOn(final Endable endable, final DisposableWrapper<E> wrapper) {
+        if (null!=endable) {
+            final Action0 undo = endable.doOnEnd(new Action0() {
                 @Override
                 public void call() {
                     wrapper.dispose();
@@ -129,20 +128,20 @@ public class DisposableWrapperUtil {
         return wrapper;
     }
 
-    public static <E> Action1<DisposableWrapper<E>> disposeOn(final Endable terminable) {
+    public static <E> Action1<DisposableWrapper<E>> disposeOn(final Endable endable) {
         return new Action1<DisposableWrapper<E>>() {
             @Override
             public void call(final DisposableWrapper<E> wrapper) {
-                disposeOn(terminable, wrapper);
+                disposeOn(endable, wrapper);
             }};
     }
 
-    public static Action1<Object> disposeOnForAny(final Endable terminable) {
+    public static Action1<Object> disposeOnForAny(final Endable endable) {
         return new Action1<Object>() {
             @Override
             public void call(final Object obj) {
                 if (obj instanceof DisposableWrapper) {
-                    disposeOn(terminable, (DisposableWrapper<?>)obj);
+                    disposeOn(endable, (DisposableWrapper<?>)obj);
                 }
             }};
     }
