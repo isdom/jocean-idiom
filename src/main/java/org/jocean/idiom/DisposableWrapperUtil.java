@@ -68,11 +68,11 @@ public class DisposableWrapperUtil {
         };
     }
 
-    public static <E> Func1<E, DisposableWrapper<E>> wrap(final Action1<E> disposer, final Endable endable) {
+    public static <E> Func1<E, DisposableWrapper<E>> wrap(final Action1<E> disposer, final Haltable haltable) {
         return new Func1<E, DisposableWrapper<E>>() {
             @Override
             public DisposableWrapper<E> call(final E unwrap) {
-                return disposeOn(endable, wrap(unwrap, disposer));
+                return disposeOn(haltable, wrap(unwrap, disposer));
             }
         };
     }
@@ -116,9 +116,9 @@ public class DisposableWrapperUtil {
             }};
     }
 
-    public static <E> DisposableWrapper<E> disposeOn(final Endable endable, final DisposableWrapper<E> wrapper) {
-        if (null!=endable) {
-            final Action0 undo = endable.doOnEnd(new Action0() {
+    public static <E> DisposableWrapper<E> disposeOn(final Haltable haltable, final DisposableWrapper<E> wrapper) {
+        if (null!=haltable) {
+            final Action0 undo = haltable.doOnHalt(new Action0() {
                 @Override
                 public void call() {
                     wrapper.dispose();
@@ -128,20 +128,20 @@ public class DisposableWrapperUtil {
         return wrapper;
     }
 
-    public static <E> Action1<DisposableWrapper<E>> disposeOn(final Endable endable) {
+    public static <E> Action1<DisposableWrapper<E>> disposeOn(final Haltable haltable) {
         return new Action1<DisposableWrapper<E>>() {
             @Override
             public void call(final DisposableWrapper<E> wrapper) {
-                disposeOn(endable, wrapper);
+                disposeOn(haltable, wrapper);
             }};
     }
 
-    public static Action1<Object> disposeOnForAny(final Endable endable) {
+    public static Action1<Object> disposeOnForAny(final Haltable haltable) {
         return new Action1<Object>() {
             @Override
             public void call(final Object obj) {
                 if (obj instanceof DisposableWrapper) {
-                    disposeOn(endable, (DisposableWrapper<?>)obj);
+                    disposeOn(haltable, (DisposableWrapper<?>)obj);
                 }
             }};
     }

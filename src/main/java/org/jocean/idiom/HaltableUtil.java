@@ -19,44 +19,44 @@ import rx.subscriptions.Subscriptions;
  * @author isdom
  *
  */
-public class EndableUtil {
+public class HaltableUtil {
 
-    private EndableUtil() {
+    private HaltableUtil() {
         throw new IllegalStateException("No instances!");
     }
 
-    public static Endable nop() {
-        return new Endable() {
+    public static Haltable nop() {
+        return new Haltable() {
 
             @Override
-            public Action1<Action0> onEnd() {
+            public Action1<Action0> onHalt() {
                 return Actions.empty();
             }
 
             @Override
-            public Action0 doOnEnd(final Action0 onend) {
+            public Action0 doOnHalt(final Action0 onend) {
                 return Actions.empty();
             }};
     }
 
-    public static Endable delay(final long delay, final TimeUnit unit) {
+    public static Haltable delay(final long delay, final TimeUnit unit) {
         final CompositeSubscription cs = new CompositeSubscription();
 
         Observable.timer(delay, unit).subscribe(RxActions.toAction1(RxActions.subscription2Action0(cs)));
 
-        return new Endable() {
+        return new Haltable() {
             @Override
-            public Action1<Action0> onEnd() {
+            public Action1<Action0> onHalt() {
                 return new Action1<Action0>() {
                     @Override
-                    public void call(final Action0 onend) {
-                        doOnEnd(onend);
+                    public void call(final Action0 onhalt) {
+                        doOnHalt(onhalt);
                     }};
             }
 
             @Override
-            public Action0 doOnEnd(final Action0 onend) {
-                final Subscription s = Subscriptions.create(onend);
+            public Action0 doOnHalt(final Action0 onhalt) {
+                final Subscription s = Subscriptions.create(onhalt);
                 cs.add(s);
                 return new Action0() {
                     @Override
