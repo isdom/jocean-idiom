@@ -17,10 +17,9 @@ public class Proxys {
         PASSTHROUGH,
         SELF
     }
-    
-    private static final Logger LOG = 
-            LoggerFactory.getLogger(Proxys.class);
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(Proxys.class);
+
     private Proxys() {
         throw new IllegalStateException("No instances!");
     }
@@ -31,17 +30,17 @@ public class Proxys {
         final RET[] rets = new RET[delegates.length];
         Arrays.fill(rets, RET.PASSTHROUGH);
         return (T) Proxy.newProxyInstance(
-            Thread.currentThread().getContextClassLoader(), 
+            Thread.currentThread().getContextClassLoader(),
             new Class<?>[]{intf}, new DelegateHandler(delegates, rets));
     }
-    
+
     @SuppressWarnings("unchecked")
     public static <T> T delegate(final Class<T> intf, final Object[] delegates, final RET[] rets) {
         return (T) Proxy.newProxyInstance(
-            Thread.currentThread().getContextClassLoader(), 
+            Thread.currentThread().getContextClassLoader(),
             new Class<?>[]{intf}, new DelegateHandler(delegates, rets));
     }
-    
+
     private final static SimpleCache<String, Pair<Integer,Method>> METHODS = new SimpleCache<>(new Func1<String, Pair<Integer,Method>>() {
         @Override
         public Pair<Integer,Method> call(final String classesAndMethod) {
@@ -55,17 +54,17 @@ public class Proxys {
                         return Pair.of(idx, method);
                     }
                 }
-            } catch (ClassNotFoundException e) {
-                LOG.warn("exception when Class.forName({}), detail: {}", 
+            } catch (final ClassNotFoundException e) {
+                LOG.warn("exception when Class.forName({}), detail: {}",
                         ss[0], ExceptionUtils.exception2detail(e));
             }
             return null;
         }});
-    
+
     private static String classesNameOf(final Object[] delegates) {
         final StringBuilder sb = new StringBuilder();
         String splitter = "";
-        for (Object o : delegates) {
+        for (final Object o : delegates) {
             sb.append(splitter);
             sb.append(o.getClass().getName());
             splitter = "/";
@@ -84,13 +83,14 @@ public class Proxys {
             this._classes = classesNameOf(delegates);
         }
 
+        @Override
         public Object invoke(final Object obj, final Method method, final Object[] args)
                 throws Throwable {
             //   An invocation of the hashCode, equals, or toString methods
-            // declared in java.lang.Object on a proxy instance will be 
+            // declared in java.lang.Object on a proxy instance will be
             // encoded and dispatched to the invocation handler's invoke
             // method in the same manner as interface method invocations are
-            // encoded and dispatched, as described above. The declaring 
+            // encoded and dispatched, as described above. The declaring
             // class of the Method object passed to invoke will be
             // java.lang.Object. Other public methods of a proxy instance
             // inherited from java.lang.Object are not overridden by a proxy
@@ -103,7 +103,7 @@ public class Proxys {
             } else if (method.getName().equals("toString")) {
                 return this._delegates[0].toString();
             }
-            
+
             final String classesAndMethod = this._classes + ":" + method.getName();
             final Pair<Integer,Method> idxAndMethod = METHODS.get(classesAndMethod);
             if (null != idxAndMethod) {
@@ -121,7 +121,7 @@ public class Proxys {
             }
             return null;
         }
-        
+
         private final Object[] _delegates;
         private final RET[] _rets;
         private final String _classes;
@@ -131,7 +131,7 @@ public class Proxys {
         public <T> MixinBuilder mix(final Class<T> type, final T obj);
         public <T> T build();
     }
-    
+
     public static MixinBuilder mixin() {
         final Map<Class<?>, Object> _mixin = new HashMap<>();
         return new MixinBuilder() {
@@ -146,25 +146,26 @@ public class Proxys {
             @Override
             public <T> T build() {
                 return (T) Proxy.newProxyInstance(
-                        Thread.currentThread().getContextClassLoader(), 
-                        _mixin.keySet().toArray(new Class<?>[0]), 
+                        Thread.currentThread().getContextClassLoader(),
+                        _mixin.keySet().toArray(new Class<?>[0]),
                         new MixinHandler(_mixin));
             }};
     }
-    
+
     private static class MixinHandler implements InvocationHandler {
 
         public MixinHandler(final Map<Class<?>, Object> mixin) {
             this._mixin = mixin;
         }
 
+        @Override
         public Object invoke(final Object obj, final Method method, final Object[] args)
                 throws Throwable {
             //   An invocation of the hashCode, equals, or toString methods
-            // declared in java.lang.Object on a proxy instance will be 
+            // declared in java.lang.Object on a proxy instance will be
             // encoded and dispatched to the invocation handler's invoke
             // method in the same manner as interface method invocations are
-            // encoded and dispatched, as described above. The declaring 
+            // encoded and dispatched, as described above. The declaring
             // class of the Method object passed to invoke will be
             // java.lang.Object. Other public methods of a proxy instance
             // inherited from java.lang.Object are not overridden by a proxy
@@ -177,7 +178,7 @@ public class Proxys {
             } else if (method.getName().equals("toString")) {
                 return this._mixin.toString();
             }
-            
+
             final Object target = this._mixin.get(method.getDeclaringClass());
             if (null != target) {
                 return method.invoke(target, args);
@@ -185,7 +186,7 @@ public class Proxys {
                 throw new RuntimeException("invalid method(" + method +") invoke");
             }
         }
-        
+
         private final Map<Class<?>, Object> _mixin;
     }
 }
