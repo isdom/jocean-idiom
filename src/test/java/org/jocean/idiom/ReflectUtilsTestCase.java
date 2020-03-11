@@ -98,6 +98,10 @@ public class ReflectUtilsTestCase {
         return null;
     }
 
+    public static Observable observableMethod2() {
+        return null;
+    }
+
     public static Integer nonObservableMethod1() {
         return 1;
     }
@@ -107,7 +111,7 @@ public class ReflectUtilsTestCase {
         final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("observableMethod1");
         final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
 
-        assertEquals(rawType, Observable.class);
+        assertEquals(Observable.class, rawType);
     }
 
     @Test
@@ -116,6 +120,14 @@ public class ReflectUtilsTestCase {
         final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
 
         assertNull(rawType);
+    }
+
+    @Test
+    public void testGetParameterizedRawType3() throws Exception {
+        final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("observableMethod2");
+        final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
+
+        assertEquals(Observable.class, rawType);
     }
 
     @Test
