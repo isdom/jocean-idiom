@@ -1,24 +1,31 @@
 package org.jocean.idiom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.junit.Test;
+
+import rx.Observable;
 
 public class ReflectUtilsTestCase {
 
 	class Inner1 {
 		class Inner2 {
 		}
-		
+
 		Inner2 inner2 = new Inner2();
 	};
-	
+
 	@Test
 	public void testGetOuterFromInnerObjectForInner1() {
 		final ReflectUtilsTestCase case1 = ReflectUtils.getOuterFromInnerObject(new Inner1());
-		
+
 		assertNotNull(case1);
 	}
 
@@ -26,7 +33,7 @@ public class ReflectUtilsTestCase {
 	public void testGetOuterFromInnerObjectForInner2() {
 		final Inner1 inner1 = new Inner1();
 		final Inner1 innerRet = ReflectUtils.getOuterFromInnerObject(inner1.inner2);
-		
+
 		assertSame(innerRet, inner1);
 	}
 
@@ -36,8 +43,8 @@ public class ReflectUtilsTestCase {
         protected Object clone() throws CloneNotSupportedException {
             return super.clone();
         }
-        
-        
+
+
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -48,14 +55,14 @@ public class ReflectUtilsTestCase {
 
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            A other = (A) obj;
+            final A other = (A) obj;
             if (i != other.i)
                 return false;
             return true;
@@ -64,13 +71,13 @@ public class ReflectUtilsTestCase {
 
         private final int i = 10;
 	}
-	
+
     @Test
     public void testClone() {
         final A a = new A();
-        
+
         final A clonedA = ReflectUtils.invokeClone(a);
-        
+
         assertEquals(a, clonedA);
     }
 
@@ -78,12 +85,44 @@ public class ReflectUtilsTestCase {
         @SuppressWarnings("unused")
         private final String field1 = "test";
     }
-    
+
     @Test
     public void testGetAnnotationFieldsOf() {
         final Field[] testFields = ReflectUtils.getAnnotationFieldsOf(NonAnnotation.class, Test.class);
-        
+
         assertNotNull(testFields);
         assertEquals(0, testFields.length);
+    }
+
+    public static Observable<Integer> observableMethod1() {
+        return null;
+    }
+
+    public static Integer nonObservableMethod1() {
+        return 1;
+    }
+
+    @Test
+    public void testGetParameterizedRawType1() throws Exception {
+        final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("observableMethod1");
+        final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
+
+        assertEquals(rawType, Observable.class);
+    }
+
+    @Test
+    public void testGetParameterizedRawType2() throws Exception {
+        final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("nonObservableMethod1");
+        final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
+
+        assertNull(rawType);
+    }
+
+    @Test
+    public void testGetParameterizedTypeArgument1() throws Exception {
+        final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("observableMethod1");
+        final Type typeArg0 = ReflectUtils.getParameterizedTypeArgument(method.getGenericReturnType(), 0);
+
+        assertEquals(typeArg0, Integer.class);
     }
 }
