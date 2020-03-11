@@ -127,7 +127,7 @@ public class ReflectUtilsTestCase {
         final Method method = ReflectUtilsTestCase.class.getDeclaredMethod("observableMethod2");
         final Class<?> rawType = ReflectUtils.getParameterizedRawType(method.getGenericReturnType());
 
-        assertEquals(Observable.class, rawType);
+        assertNull(rawType);
     }
 
     @Test
