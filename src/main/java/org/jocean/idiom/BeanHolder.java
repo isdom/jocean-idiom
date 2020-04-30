@@ -10,4 +10,6 @@ public interface BeanHolder {
     public Object getBean(final String name);
 
     public Object getBean(final String name, final Object... args);
+
+    public <T> T getBean(final Class<T> requiredType, final Object... args);
 }
