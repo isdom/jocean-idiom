@@ -35,10 +35,6 @@ public class Haltables {
 //            parent.doOnHalt(onhalt);
 //        }
 //    }
-    interface HaltableFactory {
-        Haltable build();
-    }
-
     public final static HaltableFactory DELAY_30S = new HaltableFactory() {
         @Override
         public Haltable build() {
