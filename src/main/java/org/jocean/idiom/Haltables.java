@@ -34,6 +34,12 @@ public class Haltables {
             return Actions.empty();
     }};
 
+    public final static HaltableTransitiveFactory EXTEND_30S = new HaltableTransitiveFactory() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return delay(30, TimeUnit.SECONDS);
+        }};
+
     public static Haltable nop() {
         return new Haltable() {
 
