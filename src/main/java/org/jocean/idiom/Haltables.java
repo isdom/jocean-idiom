@@ -37,7 +37,11 @@ public class Haltables {
     public final static HaltableTransitiveFactory EXTEND_30S = new HaltableTransitiveFactory() {
         @Override
         public Haltable build(final Haltable haltable) {
-            return delay(30, TimeUnit.SECONDS);
+            final CompositeSubscription cs = new CompositeSubscription();
+
+            haltable.doOnHalt(RxActions.subscription2Action0(cs));
+
+            return cs2haltable(cs);
         }};
 
     public static Haltable nop() {
@@ -59,6 +63,10 @@ public class Haltables {
 
         Observable.timer(delay, unit).subscribe(RxActions.toAction1(RxActions.subscription2Action0(cs)));
 
+        return cs2haltable(cs);
+    }
+
+    private static Haltable cs2haltable(final CompositeSubscription cs) {
         return new Haltable() {
             @Override
             public Action1<Action0> onHalt() {
