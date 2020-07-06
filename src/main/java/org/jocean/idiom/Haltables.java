@@ -24,6 +24,18 @@ public class Haltables {
             return delay(30, TimeUnit.SECONDS);
         }};
 
+    public final static HaltableFactory DELAY_20S = new HaltableFactory() {
+        @Override
+        public Haltable build() {
+            return delay(20, TimeUnit.SECONDS);
+        }};
+
+    public final static HaltableFactory DELAY_10S = new HaltableFactory() {
+        @Override
+        public Haltable build() {
+            return delay(10, TimeUnit.SECONDS);
+        }};
+
     public final static Haltable NEVER = new Haltable() {
         @Override
         public Action1<Action0> onHalt() {
