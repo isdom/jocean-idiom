@@ -46,14 +46,22 @@ public class Haltables {
             return Actions.empty();
     }};
 
+    public final static HaltableTransitiveFactory EXTEND_10S = new HaltableTransitiveFactory() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 10, TimeUnit.SECONDS);
+        }};
+
+    public final static HaltableTransitiveFactory EXTEND_20S = new HaltableTransitiveFactory() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 20, TimeUnit.SECONDS);
+        }};
+
     public final static HaltableTransitiveFactory EXTEND_30S = new HaltableTransitiveFactory() {
         @Override
         public Haltable build(final Haltable haltable) {
-            final CompositeSubscription cs = new CompositeSubscription();
-
-            haltable.doOnHalt(RxActions.subscription2Action0(cs));
-
-            return cs2haltable(cs);
+            return extend(haltable, 30, TimeUnit.SECONDS);
         }};
 
     public static Haltable nop() {
@@ -74,6 +82,14 @@ public class Haltables {
         final CompositeSubscription cs = new CompositeSubscription();
 
         Observable.timer(delay, unit).subscribe(RxActions.toAction1(RxActions.subscription2Action0(cs)));
+
+        return cs2haltable(cs);
+    }
+
+    public static Haltable extend(final Haltable haltable, final long delay, final TimeUnit unit) {
+        final CompositeSubscription cs = new CompositeSubscription();
+
+        haltable.doOnHalt(()->Observable.timer(delay, unit).subscribe(RxActions.toAction1(RxActions.subscription2Action0(cs))));
 
         return cs2haltable(cs);
     }
