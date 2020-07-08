@@ -1,5 +1,5 @@
 package org.jocean.idiom;
 
-public interface HaltableFactory {
+public interface HaltableBuilder {
     Haltable build();
 }

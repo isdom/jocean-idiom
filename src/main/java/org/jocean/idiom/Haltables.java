@@ -18,19 +18,19 @@ public class Haltables {
         throw new IllegalStateException("No instances!");
     }
 
-    public final static HaltableFactory DELAY_30S = new HaltableFactory() {
+    public final static HaltableBuilder DELAY_30S = new HaltableBuilder() {
         @Override
         public Haltable build() {
             return delay(30, TimeUnit.SECONDS);
         }};
 
-    public final static HaltableFactory DELAY_20S = new HaltableFactory() {
+    public final static HaltableBuilder DELAY_20S = new HaltableBuilder() {
         @Override
         public Haltable build() {
             return delay(20, TimeUnit.SECONDS);
         }};
 
-    public final static HaltableFactory DELAY_10S = new HaltableFactory() {
+    public final static HaltableBuilder DELAY_10S = new HaltableBuilder() {
         @Override
         public Haltable build() {
             return delay(10, TimeUnit.SECONDS);
@@ -46,19 +46,19 @@ public class Haltables {
             return Actions.empty();
     }};
 
-    public final static HaltableTransitiveFactory EXTEND_10S = new HaltableTransitiveFactory() {
+    public final static HaltableRelyBuilder EXTEND_10S = new HaltableRelyBuilder() {
         @Override
         public Haltable build(final Haltable haltable) {
             return extend(haltable, 10, TimeUnit.SECONDS);
         }};
 
-    public final static HaltableTransitiveFactory EXTEND_20S = new HaltableTransitiveFactory() {
+    public final static HaltableRelyBuilder EXTEND_20S = new HaltableRelyBuilder() {
         @Override
         public Haltable build(final Haltable haltable) {
             return extend(haltable, 20, TimeUnit.SECONDS);
         }};
 
-    public final static HaltableTransitiveFactory EXTEND_30S = new HaltableTransitiveFactory() {
+    public final static HaltableRelyBuilder EXTEND_30S = new HaltableRelyBuilder() {
         @Override
         public Haltable build(final Haltable haltable) {
             return extend(haltable, 30, TimeUnit.SECONDS);
