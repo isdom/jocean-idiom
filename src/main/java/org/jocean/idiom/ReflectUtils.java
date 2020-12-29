@@ -73,25 +73,19 @@ public class ReflectUtils {
         }
     }
 
-    public static Method getStaticMethod(final String fullMethodName, final Class<?>... parameterTypes) {
+    public static Method getStaticMethod(final String fullMethodName, final Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException, SecurityException  {
         try {
             final int idx = fullMethodName.lastIndexOf('.');
             final String clsName = fullMethodName.substring(0, idx);
             final String methodName = fullMethodName.substring(idx+1);
-            final Class<?> cls = Class.forName(clsName);
-            if ( null != cls ) {
-                final Method method = cls.getDeclaredMethod(methodName, parameterTypes);
-                if (null != method) {
-                    method.setAccessible(true);
-                    return method;
-                }
-            }
-        } catch (final Exception e) {
+            final Method method = Class.forName(clsName).getDeclaredMethod(methodName, parameterTypes);
+            method.setAccessible(true);
+            return method;
+         } catch (final Exception e) {
             LOG.warn("exception when getStaticMethod for ({}), detail:{}",
                     fullMethodName, ExceptionUtils.exception2detail(e) );
-            throw new RuntimeException(e);
+            throw e;
         }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
