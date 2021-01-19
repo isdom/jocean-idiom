@@ -281,6 +281,22 @@ public class ReflectUtils {
         return null;
     }
 
+    public static Method getMethodNamedDeep(final Class<?> cls, final String methodName) throws NoSuchMethodException {
+        Class<?> itr = cls;
+        while ((null != itr) && !itr.equals(Object.class)) {
+            final Method[] methods = itr.getDeclaredMethods();
+            for (final Method m : methods) {
+                if (m.getName().equals(methodName)) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+            itr = itr.getSuperclass();
+        }
+
+        throw new NoSuchMethodException(methodName);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(final Class<T> type) {
         final Constructor<?>[] constructors = type.getDeclaredConstructors();
