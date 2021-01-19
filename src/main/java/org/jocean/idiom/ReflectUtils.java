@@ -93,7 +93,7 @@ public class ReflectUtils {
             final int idx = fullMethodName.lastIndexOf('.');
             final String clsName = fullMethodName.substring(0, idx);
             final String methodName = fullMethodName.substring(idx+1);
-            final Method[] methods = Class.forName(clsName).getMethods();
+            final Method[] methods = Class.forName(clsName).getDeclaredMethods();
             for (final Method m : methods) {
                 if (m.getName().equals(methodName)) {
                     m.setAccessible(true);
