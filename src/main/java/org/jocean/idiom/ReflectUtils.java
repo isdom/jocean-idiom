@@ -88,26 +88,6 @@ public class ReflectUtils {
         }
     }
 
-    public static Method getStaticMethodByName(final String fullMethodName) throws ClassNotFoundException, NoSuchMethodException, SecurityException  {
-        try {
-            final int idx = fullMethodName.lastIndexOf('.');
-            final String clsName = fullMethodName.substring(0, idx);
-            final String methodName = fullMethodName.substring(idx+1);
-            final Method[] methods = Class.forName(clsName).getDeclaredMethods();
-            for (final Method m : methods) {
-                if (m.getName().equals(methodName)) {
-                    m.setAccessible(true);
-                    return m;
-                }
-            }
-            throw new NoSuchMethodException(fullMethodName);
-         } catch (final Exception e) {
-            LOG.warn("exception when getStaticMethodByName for ({}), detail:{}",
-                    fullMethodName, ExceptionUtils.exception2detail(e) );
-            throw e;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T getStaticFieldValue(final String fullFieldName) {
         try {
@@ -295,6 +275,26 @@ public class ReflectUtils {
         }
 
         throw new NoSuchMethodException(methodName);
+    }
+
+    public static Method getMethodByFullname(final String fullMethodName) throws ClassNotFoundException, NoSuchMethodException, SecurityException  {
+        try {
+            final int idx = fullMethodName.lastIndexOf('.');
+            final String clsName = fullMethodName.substring(0, idx);
+            final String methodName = fullMethodName.substring(idx+1);
+            final Method[] methods = Class.forName(clsName).getDeclaredMethods();
+            for (final Method m : methods) {
+                if (m.getName().equals(methodName)) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+            throw new NoSuchMethodException(fullMethodName);
+         } catch (final Exception e) {
+            LOG.warn("exception when getStaticMethodByName for ({}), detail:{}",
+                    fullMethodName, ExceptionUtils.exception2detail(e) );
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
