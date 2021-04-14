@@ -64,6 +64,23 @@ public class Haltables {
             return extend(haltable, 30, TimeUnit.SECONDS);
         }};
 
+    public final static HaltableRelyBuilder EXTEND_1MINUTES = new HaltableRelyBuilder() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 1, TimeUnit.MINUTES);
+        }};
+
+    public final static HaltableRelyBuilder EXTEND_5MINUTES = new HaltableRelyBuilder() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 5, TimeUnit.MINUTES);
+        }};
+
+    public final static HaltableRelyBuilder EXTEND_10MINUTES = new HaltableRelyBuilder() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 10, TimeUnit.MINUTES);
+        }};
     public static Haltable nop() {
         return new Haltable() {
 
