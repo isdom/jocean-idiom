@@ -81,6 +81,18 @@ public class Haltables {
         public Haltable build(final Haltable haltable) {
             return extend(haltable, 10, TimeUnit.MINUTES);
         }};
+
+    public final static HaltableRelyBuilder EXTEND_15MINUTES = new HaltableRelyBuilder() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 15, TimeUnit.MINUTES);
+        }};
+
+    public final static HaltableRelyBuilder EXTEND_30MINUTES = new HaltableRelyBuilder() {
+        @Override
+        public Haltable build(final Haltable haltable) {
+            return extend(haltable, 30, TimeUnit.MINUTES);
+        }};
     public static Haltable nop() {
         return new Haltable() {
 
