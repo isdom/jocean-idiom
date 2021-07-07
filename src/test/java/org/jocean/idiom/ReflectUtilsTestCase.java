@@ -142,15 +142,27 @@ public class ReflectUtilsTestCase {
         assertEquals(typeArg0, Integer.class);
     }
 
-    Function<String, Map<String,String>>  fieldFunction1;
+    Function<String, Map<String,String>>  functionField1;
 
     @Test
     public void testParameterizedTypedFieldCase1() throws Exception {
-        final Field field = ReflectUtilsTestCase.class.getDeclaredField("fieldFunction1");
+        final Field field = ReflectUtilsTestCase.class.getDeclaredField("functionField1");
         final Type typeArg1 = ReflectUtils.getParameterizedTypeArgument(field.getGenericType(), 1);
 
         assertTrue (typeArg1 instanceof ParameterizedType);
 
         assertEquals(Map.class, ((ParameterizedType)typeArg1).getRawType());
+    }
+
+    @SuppressWarnings("rawtypes")
+    Function  classField1;
+
+    @Test
+    public void testGetRawType() throws Exception {
+        final Field field1 = ReflectUtilsTestCase.class.getDeclaredField("functionField1");
+        assertEquals(Function.class, ReflectUtils.getRawType(field1.getGenericType()));
+
+        final Field field2 = ReflectUtilsTestCase.class.getDeclaredField("classField1");
+        assertEquals(Function.class, ReflectUtils.getRawType(field2.getGenericType()));
     }
 }

@@ -313,6 +313,16 @@ public class ReflectUtils {
         return null;
     }
 
+    public static Class<?> getRawType(final Type anyType) {
+        if (anyType instanceof Class<?>) {
+            return (Class<?>)anyType;
+        } else if (anyType instanceof ParameterizedType) {
+            return (Class<?>)((ParameterizedType)anyType).getRawType();
+        } else {
+            return null;
+        }
+    }
+
     public static Class<?> getParameterizedRawType(final Type genericType) {
         if (genericType instanceof ParameterizedType) {
             final ParameterizedType parameterizedType = (ParameterizedType)genericType;
