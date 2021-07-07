@@ -4,10 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.junit.Test;
 
@@ -136,5 +140,17 @@ public class ReflectUtilsTestCase {
         final Type typeArg0 = ReflectUtils.getParameterizedTypeArgument(method.getGenericReturnType(), 0);
 
         assertEquals(typeArg0, Integer.class);
+    }
+
+    Function<String, Map<String,String>>  fieldFunction1;
+
+    @Test
+    public void testParameterizedTypedFieldCase1() throws Exception {
+        final Field field = ReflectUtilsTestCase.class.getDeclaredField("fieldFunction1");
+        final Type typeArg1 = ReflectUtils.getParameterizedTypeArgument(field.getGenericType(), 1);
+
+        assertTrue (typeArg1 instanceof ParameterizedType);
+
+        assertEquals(Map.class, ((ParameterizedType)typeArg1).getRawType());
     }
 }
