@@ -23,8 +23,10 @@ import org.slf4j.LoggerFactory;
  */
 public class ReflectUtils {
 
-    private static final Field[] EMPTY_FIELDS = new Field[0];
     private static final Logger LOG = LoggerFactory.getLogger(ReflectUtils.class);
+
+    private static final Field[] EMPTY_FIELDS = new Field[0];
+    private static final Method[] EMPTY_METHODS = new Method[0];
 
     @SuppressWarnings("unchecked")
     public static <T> T invokeClone(final T cloneable) {
@@ -295,6 +297,18 @@ public class ReflectUtils {
                     fullMethodName, ExceptionUtils.exception2detail(e) );
             throw e;
         }
+    }
+
+    public static Method[] getAllMethodsOfClass(final Class<?> cls) {
+        Method[] methods = EMPTY_METHODS;
+
+        Class<?> itr = cls;
+        while ( (null != itr) && !itr.equals(Object.class)) {
+            methods = concat(itr.getDeclaredMethods(), methods);
+            itr = itr.getSuperclass();
+        }
+
+        return  methods;
     }
 
     @SuppressWarnings("unchecked")
