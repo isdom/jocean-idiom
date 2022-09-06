@@ -302,10 +302,13 @@ public class ReflectUtils {
     public static Method[] getAllMethodsOfClass(final Class<?> cls) {
         Method[] methods = EMPTY_METHODS;
 
-        Class<?> itr = cls;
-        while ( (null != itr) && !itr.equals(Object.class)) {
-            methods = concat(itr.getDeclaredMethods(), methods);
-            itr = itr.getSuperclass();
+        if (null != cls && !cls.equals(Object.class)) {
+            methods = concat(cls.getDeclaredMethods(), methods);
+            methods = concat(getAllMethodsOfClass(cls.getSuperclass()), methods);
+
+            for (final Class<?> interf : cls.getInterfaces()) {
+                methods = concat(getAllMethodsOfClass(interf), methods);
+            }
         }
 
         return  methods;

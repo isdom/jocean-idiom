@@ -165,4 +165,25 @@ public class ReflectUtilsTestCase {
         final Field field2 = ReflectUtilsTestCase.class.getDeclaredField("classField1");
         assertEquals(Function.class, ReflectUtils.getRawType(field2.getGenericType()));
     }
+
+    interface IA {
+        public int mofa();
+    };
+
+    interface IB extends IA {
+        public int mofb();
+    };
+
+    interface ID {
+        public int mofd();
+    };
+
+    interface IC extends IB, ID {
+        public int mofc();
+    };
+
+    @Test
+    public void testGetAllMethodsOfClass() throws Exception {
+        assertEquals(4, ReflectUtils.getAllMethodsOfClass(IC.class).length);
+    }
 }
